@@ -28,7 +28,7 @@ const bankBot = (function() {
 		let [,typeTransaction, ...transaction] = args;
 
 		//switch this when other options are available
-		if(typeTransaction="personal"){
+		if(typeTransaction=="personal"){
 			personalChandler(msg,transaction)
 		}
 	};

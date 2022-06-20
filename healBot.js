@@ -2,7 +2,7 @@ const healBot = (function() {
 
 	const scriptIndex = {"name":"healBot","version":"v0.01",};
 
-	// format text message feedback to look pretty
+	// format text message feedback to look pretty right?
 
 	on("chat:message", function(msg) {
 

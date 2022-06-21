@@ -67,29 +67,29 @@ NPC mass request PC  (GM only)
 		_walletsAfterSend;
 		_walletsAfterReceive;
 		constructor(type,subtype,name,split=false,walletExchange,walletsSend,walletsReceive){
-            this._type = type;
+			this._type = type;
             this._subType = subtype;
             this._name = name;
 			this._split = split;
 			this._walletExchange = walletExchange;
             this._walletsBeforeSend = new Map();                                                     //creates an empty map of wallets before the transaction
-            if (walletsSend.typeof == "object" && walletsSend instanceof WalletPC) {                 //checks if walletsSend is a singular wallet
+            if (walletsSend.typeof === "object" && walletsSend instanceof WalletPC) {                 //checks if walletsSend is a singular wallet
                 _walletsBeforeSend.set(walletsSend.charID, JSON.parse(JSON.stringify(walletsSend))); //deepcopies the wallet to the before map using the character ID as the key (wallet can be retrieved like in an array but using charID instead of a number)
             } 
 			else if (Object.prototype.toString.call(walletsSend) === '[object Array]') {         //checks to see if walletsSend is an array
-                for (wallet in walletsSend) {                                                     //iterates over all elements in the array
-                    if (walletsSend.typeof == "object" && walletsSend instanceof WalletPC) {        //checks to see if there are objects in the array and if these are wallets
+                for (let wallet in walletsSend) {                                                     //iterates over all elements in the array
+                    if (walletsSend.typeof === "object" && walletsSend instanceof WalletPC) {        //checks to see if there are objects in the array and if these are wallets
                         _walletsBeforeSend.set(wallet.charID, JSON.parse(JSON.stringify(wallet)));     //deepcopies the wallet to the before map using the character ID as the key
                     }
                 }
             }
 			this._walletsBeforeReceive = new Map();  
-			if (walletsReceive.typeof == "object" && walletsReceive instanceof WalletPC) {         //repeats the same steps as above for walletsReceive
+			if (walletsReceive.typeof === "object" && walletsReceive instanceof WalletPC) {         //repeats the same steps as above for walletsReceive
                 _walletsBeforeReceive.set(walletsReceive.charID, JSON.parse(JSON.stringify(walletsReceive)));
             } 
 			else if (Object.prototype.toString.call(walletsReceive) === '[object Array]') {
-                for (wallet in walletsReceive) {
-                    if (wallet.typeof == "object" && wallet instanceof WalletPC) { 
+                for (let wallet in walletsReceive) {
+                    if (wallet.typeof === "object" && wallet instanceof WalletPC) {
                         _walletsBeforeReceive.set(wallet.charID, JSON.parse(JSON.stringify(wallet)));
                     }
                 }
@@ -187,7 +187,8 @@ NPC mass request PC  (GM only)
 
 	class WalletNPC extends Wallet{
 		constructor(pp=0,gp=0,sp=0,cp=0){
-			if(pp.typeof == "array"){
+			super();
+			if(pp.typeof === "array"){
 				this._pp = parseInt(pp[0]);
 				this._gp = parseInt(pp[1]);
 				this._sp = parseInt(pp[2]);
@@ -204,6 +205,7 @@ NPC mass request PC  (GM only)
 
 	class WalletPC extends Wallet{
 		constructor(charID){
+			super();
 			this._pp = parseInt(getAttrByName(charID,"pp"));
 			this._gp = parseInt(getAttrByName(charID,"gp"));
 			this._sp = parseInt(getAttrByName(charID,"sp"));
@@ -253,7 +255,7 @@ NPC mass request PC  (GM only)
 	//BEGIN THE ACTUAL FUNCTIONS
 
 	on("chat:message", function(msg) {
-		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!bankbot")==0){
+		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!bankbot")===0){
 			Chandler(msg);
 			return;
 		}
@@ -266,7 +268,7 @@ NPC mass request PC  (GM only)
 		let [,typeTransaction, ...transaction] = args;
 
 		//switch this when other options are available
-		if(typeTransaction=="personal"){
+		if(typeTransaction==="personal"){
 			personalChandler(msg,transaction)
 		}
 	};
@@ -413,13 +415,13 @@ NPC mass request PC  (GM only)
 
 	//chat bullocks
     function chatter(spkAs,slashCom,whisperTo,msgText,options){
-		if(slashCom && slashCom.toLowerCase() == "w"){
+		if(slashCom && slashCom.toLowerCase() === "w"){
 			if(typeof whisperTo === "string"){
 				whisperTo = whisperTo.replace(/\(GM\)/, '').trim();
 				slashCom = slashCom.concat(` ${whisperTo}`);
 			}
 			else if(Array.isArray(whisperTo)){
-				if(whisperTo[0].toLowerCase() == "character"){
+				if(whisperTo[0].toLowerCase() === "character"){
 					switch(whisperTo[1].get("controlledby")){
 						//whispering to everyone, DOH! change to public
 						case "all":

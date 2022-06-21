@@ -66,12 +66,12 @@ NPC mass request PC  (GM only)
 		_time = new Date();
 		_walletsAfterSend;
 		_walletsAfterReceive;
-		constructor(type,subtype,name,split=false,walletChange,walletsSend,walletsReceive){
+		constructor(type,subtype,name,split=false,walletExchange,walletsSend,walletsReceive){
             this._type = type;
             this._subType = subtype;
             this._name = name;
 			this._split = split;
-			this._walletChange = walletChange;
+			this._walletExchange = walletExchange;
             this._walletsBeforeSend = new Map();                                                     //creates an empty map of wallets before the transaction
             if (walletsSend.typeof == "object" && walletsSend instanceof WalletPC) {                 //checks if walletsSend is a singular wallet
                 _walletsBeforeSend.set(walletsSend.charID, JSON.parse(JSON.stringify(walletsSend))); //deepcopies the wallet to the before map using the character ID as the key (wallet can be retrieved like in an array but using charID instead of a number)

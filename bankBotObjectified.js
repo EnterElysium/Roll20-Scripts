@@ -173,7 +173,7 @@ NPC mass request PC  (GM only)
 			cp %= 100;
 			this._sp = Math.floor(cp/10);
 			cp %= 10;
-			this._cp = cp;
+			this._cp = Math.floor(cp);
 		}
 		readBalance(){
 			let moneyTxt;
@@ -218,12 +218,41 @@ NPC mass request PC  (GM only)
 		get charName(){
 			return this._charName;
 		}
+		pushBalance(){
+			//pp
+			let ppAttr = findObjs({
+				_characterid: charID,
+				_type: "attribute",
+				name: "pp"
+			})[0];
+			ppAttr.set("current",this._pp);
+			//gp
+			let gpAttr = findObjs({
+				_characterid: charID,
+				_type: "attribute",
+				name: "gp"
+			})[0];
+			gpAttr.set("current",this._gp);
+			//sp
+			let spAttr = findObjs({
+				_characterid: charID,
+				_type: "attribute",
+				name: "sp"
+			})[0];
+			spAttr.set("current",this._sp);
+			//cp
+			let cpAttr = findObjs({
+				_characterid: charID,
+				_type: "attribute",
+				name: "cp"
+			})[0];
+			cpAttr.set("current",this._cp);
+		};
 	};
 
 	//BEGIN THE ACTUAL FUNCTIONS
 
 	on("chat:message", function(msg) {
-
 		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!bankbot")==0){
 			Chandler(msg);
 			return;

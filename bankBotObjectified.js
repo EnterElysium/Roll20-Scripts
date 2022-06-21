@@ -1,4 +1,4 @@
-const bankBot = (function() {	
+const bankBot = (function() {
 
 	const scriptIndex = {"name":"bankBot","version":"v0.01",};
 
@@ -40,7 +40,7 @@ PC mass send PC (PC)
 //PC mass send NPC (PC)
 NPC mass send PC (GM only)
 //NPC send NPC
-PC mass request PC (PC) --issues?
+PC mass request PC (PC)
 //PC mass request NPC (PC)
 NPC mass request PC  (GM only)
 //NPC request NPC
@@ -57,8 +57,7 @@ PC mass request PC (PC)
 NPC mass send PC (GM only)
 NPC mass request PC  (GM only)
 
-!bankbot --type send/request[/sendmass/requestmass] ([--split]) (--time) --from charid --to charid --value xxpp xxcp xxsp xxgp 
-!bankbot --type send --split --from @{selected|character_id} --to @{target|character_id} --value ?{value to send "50pp 3sp"|1gp}
+!bankbot --type send/request/sendmass/requestmass --from charid --to charid --value xxpp xxcp xxsp xxgp
 
 */
 	class Transaction{
@@ -129,7 +128,7 @@ NPC mass request PC  (GM only)
 			this._walletsAfterReceive = value;
 		}
 		validate(){
-			if(!(this.type == "send" || this.type == "receive")){
+			if(!(this.type === "send" || this.type === "receive")){
 				return "error not sure if sending or receiving";
 			}
 			if(!this.walletExchange){
@@ -141,10 +140,10 @@ NPC mass request PC  (GM only)
 			if(!this.walletsBeforeReceive){
 				return "error no receiver";
 			}
-			if(this.type == "send"){
+			if(this.type === "send"){
 				return "complete";
 			}
-			else if(this.type == "receive"){
+			else if(this.type === "receive"){
 				return "request";
 			}
 			return "unknown error";
@@ -214,10 +213,10 @@ NPC mass request PC  (GM only)
 			cp %= 100;
 			this.sp = Math.floor(cp/10);
 			cp %= 10;
-			this.cp = Math.floor(cp);
+			this._cp = Math.floor(cp);
 		}
 		readBalance(){
-			let moneyTxt = "";
+			let moneyTxt;
 			this.pp > 0 ? moneyTxt += `${this.pp}pp `: false;
 			this.gp > 0 ? moneyTxt += `${this.gp}gp `: false;
 			this.sp > 0 ? moneyTxt += `${this.sp}sp `: false;
@@ -296,7 +295,7 @@ NPC mass request PC  (GM only)
 	//BEGIN THE ACTUAL FUNCTIONS
 
 	on("chat:message", function(msg) {
-		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!bankbot")==0){
+		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!bankbot")===0){
 			Chandler(msg);
 			return;
 		}
@@ -314,7 +313,7 @@ NPC mass request PC  (GM only)
 			};
 		});
 		args.shift();
-		
+
 		//[{"cmd":"!sniff","params":[]},{"cmd":"hats","params":["tophat","beanie","cap"]},{"cmd":"shorts","params":["jeanshorts"]}]
 		//not handling mass selection for now
 		//send 1p-w
@@ -363,7 +362,7 @@ NPC mass request PC  (GM only)
 					break;
 				case "from":
 					for (let id of flag.params) {
-						if (id == "world") {
+						if (id === "world") {
 							transaction.walletsBeforeSend.push("world");
 						}
 						else {
@@ -373,7 +372,7 @@ NPC mass request PC  (GM only)
 					break;
 				case "to":
 					for (let id of flag.params) {
-						if (id == "world") {
+						if (id === "world") {
 							transaction.walletsBeforeReceive.push("world");
 						}
 						else {
@@ -398,7 +397,6 @@ NPC mass request PC  (GM only)
 					//if time does exist check if it is still valid
 					//TIMEOUT FUNCTION HERE
 					break;
-					return transaction;
 			}
 		}
 		log(transaction);
@@ -549,13 +547,13 @@ NPC mass request PC  (GM only)
 
 	//chat bullocks
     function chatter(spkAs,slashCom,whisperTo,msgText,options){
-		if(slashCom && slashCom.toLowerCase() == "w"){
+		if(slashCom && slashCom.toLowerCase() === "w"){
 			if(typeof whisperTo === "string"){
 				whisperTo = whisperTo.replace(/\(GM\)/, '').trim();
 				slashCom = slashCom.concat(` ${whisperTo}`);
 			}
 			else if(Array.isArray(whisperTo)){
-				if(whisperTo[0].toLowerCase() == "character"){
+				if(whisperTo[0].toLowerCase() === "character"){
 					switch(whisperTo[1].get("controlledby")){
 						//whispering to everyone, DOH! change to public
 						case "all":

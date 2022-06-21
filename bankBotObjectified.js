@@ -40,7 +40,7 @@ PC mass send PC (PC)
 //PC mass send NPC (PC)
 NPC mass send PC (GM only)
 //NPC send NPC
-PC mass request PC (PC)
+PC mass request PC (PC) --issues?
 //PC mass request NPC (PC)
 NPC mass request PC  (GM only)
 //NPC request NPC
@@ -57,44 +57,22 @@ PC mass request PC (PC)
 NPC mass send PC (GM only)
 NPC mass request PC  (GM only)
 
-!bankbot --type send/request/sendmass/requestmass --from charid --to charid --value xxpp xxcp xxsp xxgp 
+!bankbot --type send/request[/sendmass/requestmass] ([--split]) (--time) --from charid --to charid --value xxpp xxcp xxsp xxgp 
+!bankbot --type send --split --from @{selected|character_id} --to @{target|character_id} --value ?{value to send "50pp 3sp"|1gp}
 
 */
-
 	class Transaction{
-		_id = crypto.randomUUID();
+		_id = Transaction.generateUUID();
 		_time = new Date();
-		_walletsAfterSend;
-		_walletsAfterReceive;
-		constructor(type,subtype,name,split=false,walletExchange,walletsSend,walletsReceive){
-            this._type = type;
-            this._subType = subtype;
-            this._name = name;
-			this._split = split;
-			this._walletExchange = walletExchange;
-            this._walletsBeforeSend = new Map();                                                     //creates an empty map of wallets before the transaction
-            if (walletsSend.typeof == "object" && walletsSend instanceof WalletPC) {                 //checks if walletsSend is a singular wallet
-                _walletsBeforeSend.set(walletsSend.charID, JSON.parse(JSON.stringify(walletsSend))); //deepcopies the wallet to the before map using the character ID as the key (wallet can be retrieved like in an array but using charID instead of a number)
-            } 
-			else if (Object.prototype.toString.call(walletsSend) === '[object Array]') {         //checks to see if walletsSend is an array
-                for (wallet in walletsSend) {                                                     //iterates over all elements in the array
-                    if (walletsSend.typeof == "object" && walletsSend instanceof WalletPC) {        //checks to see if there are objects in the array and if these are wallets
-                        _walletsBeforeSend.set(wallet.charID, JSON.parse(JSON.stringify(wallet)));     //deepcopies the wallet to the before map using the character ID as the key
-                    }
-                }
-            }
-			this._walletsBeforeReceive = new Map();  
-			if (walletsReceive.typeof == "object" && walletsReceive instanceof WalletPC) {         //repeats the same steps as above for walletsReceive
-                _walletsBeforeReceive.set(walletsReceive.charID, JSON.parse(JSON.stringify(walletsReceive)));
-            } 
-			else if (Object.prototype.toString.call(walletsReceive) === '[object Array]') {
-                for (wallet in walletsReceive) {
-                    if (wallet.typeof == "object" && wallet instanceof WalletPC) { 
-                        _walletsBeforeReceive.set(wallet.charID, JSON.parse(JSON.stringify(wallet)));
-                    }
-                }
-            }
-            //at this point you have all before wallets in _walletsBefore keyed by charID
+		_type;
+		_split=false;
+		_name="Unnamed Transaction";
+		_walletExchange;
+		_walletsBeforeSend = [];
+		_walletsBeforeReceive = [];
+		_walletsAfterSend = [];
+		_walletsAfterReceive = [];
+		constructor(){
         }
 		get id(){
 			return this._id;
@@ -108,12 +86,6 @@ NPC mass request PC  (GM only)
 		set type(type){
 			this._type = type;
 		}
-		get subtype(){
-			return this._subtype;
-		}
-		set subtype(subtype){
-			this._subtype = subtype;
-		}
 		get name(){
 			return this._name;
 		}
@@ -122,6 +94,75 @@ NPC mass request PC  (GM only)
 		}
 		get split(){
 			return this._split;
+		}
+		set split(split){
+			this._split = !!split;
+		}
+		get walletExchange(){
+			return this._walletExchange;
+		}
+		get walletsBeforeSend(){
+			return this._walletsBeforeSend;
+		}
+		get walletsBeforeReceive(){
+			return this._walletsBeforeReceive;
+		}
+		set walletExchange(wallet){
+			this._walletExchange = wallet;
+		}
+		set walletsBeforeSend(wallet){
+			this._walletsBeforeSend = wallet;
+		}
+		set walletsBeforeReceive(wallet){
+			this._walletsBeforeReceive = wallet;
+		}
+		get walletsAfterSend() {
+			return this._walletsAfterSend;
+		}
+		set walletsAfterSend(value) {
+			this._walletsAfterSend = value;
+		}
+		get walletsAfterReceive() {
+			return this._walletsAfterReceive;
+		}
+		set walletsAfterReceive(value) {
+			this._walletsAfterReceive = value;
+		}
+		validate(){
+			if(!(this.type == "send" || this.type == "receive")){
+				return "error not sure if sending or receiving";
+			}
+			if(!this.walletExchange){
+				return "error no amount sent";
+			}
+			if(!this.walletsBeforeSend){
+				return "error no sender";
+			}
+			if(!this.walletsBeforeReceive){
+				return "error no receiver";
+			}
+			if(this.type == "send"){
+				return "complete";
+			}
+			else if(this.type == "receive"){
+				return "request";
+			}
+			return "unknown error";
+		}
+		static generateUUID() { // Public Domain/MIT
+			var d = new Date().getTime();//Timestamp
+			var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = Math.random() * 16;//random number between 0 and 16
+				if(d > 0){//Use timestamp until depleted
+					r = (d + r)%16 | 0;
+					d = Math.floor(d/16);
+				} else {//Use microseconds since page-load if supported
+					r = (d2 + r)%16 | 0;
+					d2 = Math.floor(d2/16);
+				}
+				return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+			});
 		}
 	};
 
@@ -167,27 +208,28 @@ NPC mass request PC  (GM only)
 			return 1000*this._pp + 100*this._gp + 10*this._sp + this._cp;
 		}
 		setBalance(cp){
-			this._pp = Math.floor(cp/1000);
+			this.pp = Math.floor(cp/1000);
 			cp %= 1000;
-			this._gp = Math.floor(cp/100);
+			this.gp = Math.floor(cp/100);
 			cp %= 100;
-			this._sp = Math.floor(cp/10);
+			this.sp = Math.floor(cp/10);
 			cp %= 10;
-			this._cp = Math.floor(cp);
+			this.cp = Math.floor(cp);
 		}
 		readBalance(){
-			let moneyTxt;
-			this._pp > 0 ? moneyTxt += `${this._pp}pp `: false;
-			this._gp > 0 ? moneyTxt += `${this._gp}gp `: false;
-			this._sp > 0 ? moneyTxt += `${this._sp}sp `: false;
-			this._cp > 0 ? moneyTxt += `${this._cp}cp `: false;
+			let moneyTxt = "";
+			this.pp > 0 ? moneyTxt += `${this.pp}pp `: false;
+			this.gp > 0 ? moneyTxt += `${this.gp}gp `: false;
+			this.sp > 0 ? moneyTxt += `${this.sp}sp `: false;
+			this.cp > 0 ? moneyTxt += `${this.cp}cp `: false;
 			return moneyTxt.trim();
 		}
 	};
 
-	class WalletNPC extends Wallet{
+	class WalletWorld extends Wallet{
 		constructor(pp=0,gp=0,sp=0,cp=0){
-			if(pp.typeof == "array"){
+			super();
+			if(Array.isArray(pp)){
 				this._pp = parseInt(pp[0]);
 				this._gp = parseInt(pp[1]);
 				this._sp = parseInt(pp[2]);
@@ -204,6 +246,7 @@ NPC mass request PC  (GM only)
 
 	class WalletPC extends Wallet{
 		constructor(charID){
+			super();
 			this._pp = parseInt(getAttrByName(charID,"pp"));
 			this._gp = parseInt(getAttrByName(charID,"gp"));
 			this._sp = parseInt(getAttrByName(charID,"sp"));
@@ -225,28 +268,28 @@ NPC mass request PC  (GM only)
 				_type: "attribute",
 				name: "pp"
 			})[0];
-			ppAttr.set("current",this._pp);
+			ppAttr.set("current",this.pp);
 			//gp
 			let gpAttr = findObjs({
 				_characterid: charID,
 				_type: "attribute",
 				name: "gp"
 			})[0];
-			gpAttr.set("current",this._gp);
+			gpAttr.set("current",this.gp);
 			//sp
 			let spAttr = findObjs({
 				_characterid: charID,
 				_type: "attribute",
 				name: "sp"
 			})[0];
-			spAttr.set("current",this._sp);
+			spAttr.set("current",this.sp);
 			//cp
 			let cpAttr = findObjs({
 				_characterid: charID,
 				_type: "attribute",
 				name: "cp"
 			})[0];
-			cpAttr.set("current",this._cp);
+			cpAttr.set("current",this.cp);
 		};
 	};
 
@@ -262,13 +305,106 @@ NPC mass request PC  (GM only)
 	//API CHAT HANDLER
 	function Chandler(msg){
 		//check if ppgpspcp exist and creature if not
-		let args = msg.content.split(/\s+/);
-		let [,typeTransaction, ...transaction] = args;
+		// parse arguments into a hierarchy of objects
+		let args = msg.content.split(/\s+--/).map(arg=>{
+			let cmds = arg.split(/\s+/);
+			return {
+			  "cmd": cmds.shift().toLowerCase(),
+			  "params": cmds
+			};
+		});
+		args.shift();
+		
+		//[{"cmd":"!sniff","params":[]},{"cmd":"hats","params":["tophat","beanie","cap"]},{"cmd":"shorts","params":["jeanshorts"]}]
+		//not handling mass selection for now
+		//send 1p-w
+		//send w-1p
+		//send 1p-1p
+		//req 1p-1p
+		//req 1p-w
+		//req w-1p
+		doTransaction(args, msg);
+	};
 
-		//switch this when other options are available
-		if(typeTransaction=="personal"){
-			personalChandler(msg,transaction)
+	function doTransaction(args, msg) {
+		let transaction = parseArgs(args);
+		switch (transaction.validate()) {
+			case "complete":
+				sendTransaction(msg, transaction);
+				break;
+			case "request":
+				//fill in me later
+				receiveTransaction(msg, transaction);
+				break;
+			default:
+				//parse return as an error message and log
+				log(transaction.validate());
 		}
+	};
+
+	function sendTransaction(msg,transaction){
+		let valid = transaction.validate();
+	};
+
+	function parseArgs(args) {
+		let transaction = new Transaction();
+		for (let flag of args) {
+			log(flag);
+			switch (flag.cmd) {
+				case "type":
+					transaction.type = flag.params[0].toLowerCase();
+					break;
+				case "name":
+					transaction.name = flag.params.join(" ");
+					break;
+				case "split":
+					//option flag for spliting money rather than each
+					transaction.split = flag.params[0];
+					break;
+				case "from":
+					for (let id of flag.params) {
+						if (id == "world") {
+							transaction.walletsBeforeSend.push("world");
+						}
+						else {
+							transaction.walletsBeforeSend.push(new WalletPC(id));
+						}
+					};
+					break;
+				case "to":
+					for (let id of flag.params) {
+						if (id == "world") {
+							transaction.walletsBeforeReceive.push("world");
+						}
+						else {
+							transaction.walletsBeforeReceive.push(new WalletPC(id));
+						}
+					};
+					break;
+				case "value":
+					//[50pp,5sp,1cp]
+					let pp = parseInt(flag.params.toString().match(/[0-9]+pp/));
+					let gp = parseInt(flag.params.toString().match(/[0-9]+gp/));
+					let sp = parseInt(flag.params.toString().match(/[0-9]+sp/));
+					let cp = parseInt(flag.params.toString().match(/[0-9]+cp/));
+					!pp ? pp = 0 : false;
+					!gp ? gp = 0 : false;
+					!sp ? sp = 0 : false;
+					!cp ? cp = 0 : false;
+					transaction.walletExchange = new WalletWorld([pp, gp, sp, cp]);
+					break;
+				case "time":
+					//if time doesn't exist make one
+					//if time does exist check if it is still valid
+					//TIMEOUT FUNCTION HERE
+					break;
+					return transaction;
+			}
+		}
+		log(transaction);
+		log(transaction.name);
+		log(transaction.walletExchange.readBalance());
+		return transaction;
 	};
 
 	function personalChandler(msg,transaction){

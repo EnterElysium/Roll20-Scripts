@@ -12,6 +12,55 @@ const bankBot = (function() {
 //!buying list
 //!external bank account
 
+//new plan
+/*
+!bankbot --app
+makes the app appear
+app has 6 options, 2 by 2 by 2, with either param being
+send/request
+mass true/false
+pc/npc
+
+all require your character to be selected
+then they either:
+pc - app you to request a character
+request - app the controller to request
+therefore
+----COMBINATIONS----
+PC send PC (PC)
+PC send NPC (PC)
+NPC send PC (GM only)
+//NPC send NPC
+PC request PC (PC)
+PC request NPC (PC)
+NPC request PC  (GM only)
+//NPC request NPC
+----mass----
+PC mass send PC (PC)
+//PC mass send NPC (PC)
+NPC mass send PC (GM only)
+//NPC send NPC
+PC mass request PC (PC)
+//PC mass request NPC (PC)
+NPC mass request PC  (GM only)
+//NPC request NPC
+----RESULT----
+PC send PC (PC)
+PC send NPC (PC)
+PC request PC (PC)
+PC request NPC (PC)
+NPC send PC (GM only)
+NPC request PC  (GM only)
+----mass----
+PC mass send PC (PC)
+PC mass request PC (PC)
+NPC mass send PC (GM only)
+NPC mass request PC  (GM only)
+
+!bankbot --type send/request/sendmass/requestmass --from charid --to charid --value xxpp xxcp xxsp xxgp 
+
+*/
+
 	class Transaction{
 		_id = crypto.randomUUID();
 		_time = new Date();
@@ -77,12 +126,12 @@ const bankBot = (function() {
 	};
 
 	class Wallet{
-		constructor(isChar){
-			this._isChar = isChar;
-			this._pp = 0;
-			this._gp = 0;
-			this._sp = 0;
-			this._cp = 0;
+		_isChar = false;
+		_pp = 0;
+		_gp = 0;
+		_sp = 0;
+		_cp = 0;
+		constructor(){
 		}
 		get isChar() {
 			return this._isChar;
@@ -114,10 +163,10 @@ const bankBot = (function() {
 		set cp(value) {
 			this._cp = parseInt(value);
 		}
-		totalCurrent(){
+		getBalance(){
 			return 1000*this._pp + 100*this._gp + 10*this._sp + this._cp;
 		}
-		totalUpdate(cp){
+		setBalance(cp){
 			this._pp = Math.floor(cp/1000);
 			cp %= 1000;
 			this._gp = Math.floor(cp/100);
@@ -126,7 +175,7 @@ const bankBot = (function() {
 			cp %= 10;
 			this._cp = cp;
 		}
-		totalString(){
+		readBalance(){
 			let moneyTxt;
 			this._pp > 0 ? moneyTxt += `${this._pp}pp `: false;
 			this._gp > 0 ? moneyTxt += `${this._gp}gp `: false;
@@ -136,9 +185,30 @@ const bankBot = (function() {
 		}
 	};
 
+	class WalletNPC extends Wallet{
+		constructor(pp=0,gp=0,sp=0,cp=0){
+			if(pp.typeof == "array"){
+				this._pp = parseInt(pp[0]);
+				this._gp = parseInt(pp[1]);
+				this._sp = parseInt(pp[2]);
+				this._cp = parseInt(pp[3]);
+			}
+			else{
+				this._pp = parseInt(pp);
+				this._gp = parseInt(gp);
+				this._sp = parseInt(sp);
+				this._cp = parseInt(cp);
+			}
+		}
+	};
+
 	class WalletPC extends Wallet{
-		constructor(isChar,charID){
-			super(isChar);
+		constructor(charID){
+			this._pp = parseInt(getAttrByName(charID,"pp"));
+			this._gp = parseInt(getAttrByName(charID,"gp"));
+			this._sp = parseInt(getAttrByName(charID,"sp"));
+			this._cp = parseInt(getAttrByName(charID,"cp"));
+			this._isChar = true;
 			this._charID = charID;
 			this._charName = getObj('character', charID).get("name");
 		}
@@ -149,6 +219,8 @@ const bankBot = (function() {
 			return this._charName;
 		}
 	};
+
+	//BEGIN THE ACTUAL FUNCTIONS
 
 	on("chat:message", function(msg) {
 

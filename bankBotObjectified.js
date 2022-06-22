@@ -72,8 +72,12 @@ NPC mass request PC  (GM only)
 		_walletsBeforeReceive = [];
 		_walletsAfterSend = [];
 		_walletsAfterReceive = [];
-		constructor(){
+		constructor(isGM){
+			this._byGM = isGM;
         }
+		get byGM(){
+			return this._byGM;
+		}
 		get id(){
 			return this._id;
 		}
@@ -135,10 +139,10 @@ NPC mass request PC  (GM only)
 			if(!this.walletExchange){
 				return "error no amount sent";
 			}
-			if(!this.walletsBeforeSend){
+			if(!this.walletsAfterSend){
 				return "error no sender";
 			}
-			if(!this.walletsBeforeReceive){
+			if(!this.walletsAfterReceive){
 				return "error no receiver";
 			}
 			if(this.type == "send"){
@@ -148,6 +152,43 @@ NPC mass request PC  (GM only)
 				return "request";
 			}
 			return "unknown error";
+		}
+		complete(){
+			//check if world sender then confirm they are gm
+			if(this.walletsAfterSend[0] == "world"){
+				if(!this._byGM){
+					//error cannot send money from world without being a GM
+					return;
+				}
+			} //else the senders are players and we can take the money from their wallets
+			else{
+				let payOut = this.walletExchange.getBalance();
+				//check if we need to take multiple payments because we aren't spliting it
+				if(!this.split){
+					payOut *= this.walletsAfterSend.length;
+				}
+				//take payment from senders
+				for (let wallet of this.walletsAfterSend){
+					wallet.adjBalance(-payOut)
+				}
+			}
+			//check if world reciever
+			if(this.walletsAfterReceive[0] == "world"){
+				//do nothing, no auth is needed to send to the world
+			} //else the receivers are players and we can send the money to their wallets
+			else{
+				let payIn = this.walletExchange.getBalance();
+				//check if we need to split the payment
+				if(this.split){
+					payIn = Math.floor(payIn/this.walletsAfterReceive.length);
+				}
+				//give payment to receivers
+				for (let wallet of this.walletsAfterReceive){
+					wallet.adjBalance(payIn)
+				}
+			}
+			log(this);
+			return;
 		}
 		static generateUUID() { // Public Domain/MIT
 			var d = new Date().getTime();//Timestamp
@@ -215,6 +256,14 @@ NPC mass request PC  (GM only)
 			this.sp = Math.floor(cp/10);
 			cp %= 10;
 			this.cp = Math.floor(cp);
+		}
+		adjBalance(payment){
+			let currentBal = this.getBalance() + payment;
+			if(currentBal<0){
+				return false;
+			}
+			this.setBalance(currentBal);
+			return true;
 		}
 		readBalance(){
 			let moneyTxt = "";
@@ -327,27 +376,28 @@ NPC mass request PC  (GM only)
 	};
 
 	function doTransaction(args, msg) {
-		let transaction = parseArgs(args);
+		let transaction = parseArgs(args,playerIsGM(msg.playerid));
 		switch (transaction.validate()) {
 			case "complete":
-				sendTransaction(msg, transaction);
+				transactionComplete(msg, transaction);
 				break;
 			case "request":
 				//fill in me later
-				receiveTransaction(msg, transaction);
+				transactionRequest(msg, transaction);
 				break;
 			default:
 				//parse return as an error message and log
 				log(transaction.validate());
 		}
+		return;
 	};
 
-	function sendTransaction(msg,transaction){
-		let valid = transaction.validate();
+	function transactionComplete(msg,transaction){
+		transaction.complete();	
 	};
 
-	function parseArgs(args) {
-		let transaction = new Transaction();
+	function parseArgs(args,isGM) {
+		let transaction = new Transaction(isGM);
 		for (let flag of args) {
 			log(flag);
 			switch (flag.cmd) {
@@ -365,9 +415,11 @@ NPC mass request PC  (GM only)
 					for (let id of flag.params) {
 						if (id == "world") {
 							transaction.walletsBeforeSend.push("world");
+							transaction.walletsAfterSend.push("world");
 						}
 						else {
 							transaction.walletsBeforeSend.push(new WalletPC(id));
+							transaction.walletsAfterSend.push(new WalletPC(id));
 						}
 					};
 					break;
@@ -375,9 +427,11 @@ NPC mass request PC  (GM only)
 					for (let id of flag.params) {
 						if (id == "world") {
 							transaction.walletsBeforeReceive.push("world");
+							transaction.walletsAfterReceive.push("world");
 						}
 						else {
 							transaction.walletsBeforeReceive.push(new WalletPC(id));
+							transaction.walletsAfterReceive.push(new WalletPC(id));
 						}
 					};
 					break;

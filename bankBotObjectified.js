@@ -72,9 +72,13 @@ NPC mass request PC  (GM only)
 		_walletsBeforeReceive = [];
 		_walletsAfterSend = [];
 		_walletsAfterReceive = [];
-		constructor(isGM){
+		constructor(who,isGM){
+			this._who = who;
 			this._byGM = isGM;
         }
+		get who(){
+			return this._who;
+		}
 		get byGM(){
 			return this._byGM;
 		}
@@ -169,7 +173,13 @@ NPC mass request PC  (GM only)
 				}
 				//take payment from senders
 				for (let wallet of this.walletsAfterSend){
-					wallet.adjBalance(-payOut)
+					let paid = wallet.adjBalance(-payOut)
+					//did the payment FAIl to go through?
+					if(!paid){
+						//ERROR not enough cash
+						errorHandler(this.who,`${getObj('character', wallet.charID).get("name")} does not have enough money to complete this transaction. Transaction voided.`,true,true);
+						return;
+					}
 				}
 			}
 			//check if world reciever
@@ -188,6 +198,12 @@ NPC mass request PC  (GM only)
 				}
 			}
 			log(this);
+			for (let wallet of this.walletsAfterSend){
+				wallet.pushBalance();
+			}
+			for (let wallet of this.walletsAfterReceive){
+				wallet.pushBalance();
+			}			
 			return;
 		}
 		static generateUUID() { // Public Domain/MIT
@@ -313,28 +329,28 @@ NPC mass request PC  (GM only)
 		pushBalance(){
 			//pp
 			let ppAttr = findObjs({
-				_characterid: charID,
+				_characterid: this.charID,
 				_type: "attribute",
 				name: "pp"
 			})[0];
 			ppAttr.set("current",this.pp);
 			//gp
 			let gpAttr = findObjs({
-				_characterid: charID,
+				_characterid: this.charID,
 				_type: "attribute",
 				name: "gp"
 			})[0];
 			gpAttr.set("current",this.gp);
 			//sp
 			let spAttr = findObjs({
-				_characterid: charID,
+				_characterid: this.charID,
 				_type: "attribute",
 				name: "sp"
 			})[0];
 			spAttr.set("current",this.sp);
 			//cp
 			let cpAttr = findObjs({
-				_characterid: charID,
+				_characterid: this.charID,
 				_type: "attribute",
 				name: "cp"
 			})[0];
@@ -363,20 +379,11 @@ NPC mass request PC  (GM only)
 			};
 		});
 		args.shift();
-		
-		//[{"cmd":"!sniff","params":[]},{"cmd":"hats","params":["tophat","beanie","cap"]},{"cmd":"shorts","params":["jeanshorts"]}]
-		//not handling mass selection for now
-		//send 1p-w
-		//send w-1p
-		//send 1p-1p
-		//req 1p-1p
-		//req 1p-w
-		//req w-1p
 		doTransaction(args, msg);
 	};
 
 	function doTransaction(args, msg) {
-		let transaction = parseArgs(args,playerIsGM(msg.playerid));
+		let transaction = parseArgs(args,msg.who.replace(/\(GM\)/, '').trim(),playerIsGM(msg.playerid));
 		switch (transaction.validate()) {
 			case "complete":
 				transactionComplete(msg, transaction);
@@ -388,16 +395,19 @@ NPC mass request PC  (GM only)
 			default:
 				//parse return as an error message and log
 				log(transaction.validate());
+				log("OI I'M AN ERROR in doTransaction - you got to the default case.");
 		}
 		return;
 	};
 
 	function transactionComplete(msg,transaction){
-		transaction.complete();	
+		transaction.complete();
+		chatter("w",msg.who,"check log","noarchive");
+		//transaction.pushBalance();
 	};
 
-	function parseArgs(args,isGM) {
-		let transaction = new Transaction(isGM);
+	function parseArgs(args,who,isGM) {
+		let transaction = new Transaction(who,isGM);
 		for (let flag of args) {
 			log(flag);
 			switch (flag.cmd) {
@@ -405,7 +415,10 @@ NPC mass request PC  (GM only)
 					transaction.type = flag.params[0].toLowerCase();
 					break;
 				case "name":
-					transaction.name = flag.params.join(" ");
+					//provided we were actually given a name use that as the name
+					if(flag.params.length > 0){
+						transaction.name = flag.params.join(" ");
+					}
 					break;
 				case "split":
 					//option flag for spliting money rather than each
@@ -455,9 +468,6 @@ NPC mass request PC  (GM only)
 					return transaction;
 			}
 		}
-		log(transaction);
-		log(transaction.name);
-		log(transaction.walletExchange.readBalance());
 		return transaction;
 	};
 
@@ -486,14 +496,14 @@ NPC mass request PC  (GM only)
 		let msgText = `${character.get("name")} received ${transCashString}<br>`+
 		`Previous balance: ${charCashString}<br>`+
 		`New balance: ${newCashString}`;
-		chatter(null,"w",["character",character],msgText,null,"{noarchive:true}");
-		chatter(null,"w","gm",msgText,null,"{noarchive:true}");
+		chatter("w",["character",character],msgText,"{noarchive:true}");
+		chatter("w","gm",msgText,"{noarchive:true}");
 	};
 
 	function personalSub(charID,msg,transCash,charCash){
 		let newCash = charCash - transCash;
 		if(newCash<0){
-			chatter(null,"w",msg.who,`You have insufficient money to do this. The transaction has been voided.`,null,"{noarchive:true}");
+			chatter("w",msg.who,`You have insufficient money to do this. The transaction has been voided.`,"{noarchive:true}");
 			return;
 		};
 		setCharMoney(charID,newCash,transCash,charCash);
@@ -505,8 +515,8 @@ NPC mass request PC  (GM only)
 		let msgText = `${character.get("name")} spent ${transCashString}<br>`+
 		`Previous balance: ${charCashString}<br>`+
 		`New balance: ${newCashString}`;
-		chatter(null,"w",["character",character],msgText,null,"{noarchive:true}");
-		chatter(null,"w","gm",msgText,null,"{noarchive:true}");
+		chatter("w",["character",character],msgText,"{noarchive:true}");
+		chatter("w","gm",msgText,"{noarchive:true}");
 	};
 
 	function arrayConversion(array){
@@ -596,13 +606,22 @@ NPC mass request PC  (GM only)
 		return moneyString;
 	};
 
+	//error handler
+	function errorHandler(who,errorMsg,useChat,useLog){
+		useLog === false ? log(errorMsg) : false;
+		useChat === false ? sendChat("bankBot Error",errorMsg,null,{noarchive:true}) : false;
+		useLog === true ? logger(errorMsg) : false;
+		useChat === true ? chatter("w",who,errorMsg,"noarchive") : false;
+		return;
+	}
+
 	//log stuff
     function logger(logtext){
         log(scriptIndex.name+", "+scriptIndex.version+": "+logtext);
     };
 
 	//chat bullocks
-    function chatter(spkAs,slashCom,whisperTo,msgText,options){
+    function chatter(slashCom,whisperTo,msgText,options,spkAs){
 		if(slashCom && slashCom.toLowerCase() == "w"){
 			if(typeof whisperTo === "string"){
 				whisperTo = whisperTo.replace(/\(GM\)/, '').trim();
@@ -643,7 +662,7 @@ NPC mass request PC  (GM only)
 		//slashCom ? msgContents = msgContents.concat(`/${slashCom}`) : false ;
 		//whisperTo && slashCom == "w" ? msgContents = msgContents.concat(` ${whisperTo}`) : false ;
         msgText ? msgContents = msgContents.concat(` ${msgText}`) : logger("chat request but no msgText specified") ;
-        options ? options = JSON.parse(options) : false ;
+        options == "noarchive" ? options = {noarchive:true} : false ;
         sendChat(spkAs,msgContents,null,options);
     };
 

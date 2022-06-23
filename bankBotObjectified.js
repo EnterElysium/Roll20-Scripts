@@ -137,6 +137,9 @@ NPC mass request PC  (GM only)
 			this._walletsAfterReceive = value;
 		}
 		validate(){
+			if(this.type == "request"){
+				this.type == "receive";
+			}
 			if(!(this.type == "send" || this.type == "receive")){
 				return "error not sure if sending or receiving";
 			}
@@ -199,10 +202,14 @@ NPC mass request PC  (GM only)
 			}
 			log(this);
 			for (let wallet of this.walletsAfterSend){
-				wallet.pushBalance();
+				if(wallet != "world"){
+					wallet.pushBalance();
+				}
 			}
 			for (let wallet of this.walletsAfterReceive){
-				wallet.pushBalance();
+				if(wallet != "world"){
+					wallet.pushBalance();
+				}
 			}			
 			return;
 		}
@@ -379,7 +386,23 @@ NPC mass request PC  (GM only)
 			};
 		});
 		args.shift();
-		doTransaction(args, msg);
+		if(_.indexOf(_.pluck(args,"cmd"),"app") != -1){
+			doApp(args,msg);
+		}
+		else{
+			doTransaction(args, msg);
+		}
+	};
+
+	function doApp(args,msg){
+		let from = "world";
+		for (let flag of args) {
+			if(flag.cmd = "from"){
+				from = flag.params[0];
+			}
+		}
+		let appBody = builtBankAppTemplate(from,msg.playerid);
+		chatter("w",msg.who,appBody,"noarchive");
 	};
 
 	function doTransaction(args, msg) {
@@ -402,8 +425,23 @@ NPC mass request PC  (GM only)
 
 	function transactionComplete(msg,transaction){
 		transaction.complete();
-		chatter("w",msg.who,"check log","noarchive");
-		//transaction.pushBalance();
+		//adjust this for more than one-to-one
+		let sender;
+		if(transaction.walletsAfterSend[0] = "world"){
+			sender = "";
+		}
+		else{
+			sender = ["character",getObj('character', transaction.walletsAfterSend[0].charID)];
+		}
+		let receiver;
+		if(transaction.walletsAfterReceive[0] = "world"){
+			receiver = "";
+		}
+		else{
+			receiver = ["character",getObj('character', transaction.walletsAfterReceive[0].charID)];
+		}
+		chatter("w",sender,bankReceipt("send",sender,transaction));
+		chatter("w",receiver,bankReceipt("receive",receiver,transaction));
 	};
 
 	function parseArgs(args,who,isGM) {
@@ -471,139 +509,140 @@ NPC mass request PC  (GM only)
 		return transaction;
 	};
 
-	function personalChandler(msg,transaction){
-		let [charID,addOrSub, ...money] = transaction;
-		let transCash = arrayConversion(money);
-		let charCash = getCharMoneyCP(charID);
-		switch(addOrSub){
-			case "add":
-				personalAdd(charID,msg,transCash,charCash);
-				break;
-			case "subtract":
-				personalSub(charID,msg,transCash,charCash);
-				break;
+	function bankReceipt(sentOrReceive,nullIfWorld,transaction){
+		let header;
+		let desc = "";
+		let amount = transaction.walletExchange.readBalance();
+		let newBal;
+		let prevBal;
+		if(sentOrReceive == "send"){
+			//from world
+			if(!(nullIfWorld.length > 0)){
+				header = "World Bank";
+				desc += `You sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsAfterReceive[0].readBalance()}`
+			} //from PC
+			else{
+				header = getObj('character', transaction.walletsAfterSend[0].charID).get("name");
+				newBal = transaction.walletsAfterSend[0].readBalance;
+				prevBal = transaction.walletsBeforeSend[0].readBalance;
+				desc += `${header} sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+			}
 		}
+		if(sentOrReceive == "receive"){
+			//from world
+			if(!(nullIfWorld.length > 0)){
+				header = "World Bank";
+				desc += `${getObj('character', transaction.walletsAfterSend[0].charID).get("name")} sent you ${amount}.`
+			} //from PC
+			else{
+				header = getObj('character', transaction.walletsAfterReceive[0].charID).get("name");
+				newBal = transaction.walletsAfterReceive[0].readBalance;
+				prevBal = transaction.walletsBeforeReceive[0].readBalance;
+				desc += `${header} recieved ${amount} from ${getObj('character', transaction.walletsAfterSend[0].charID).get("name")}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+			}
+		}
+		senderDetails = transaction.walletsAfterSend[0].charID;
+		receiverDetails = transaction.walletsAfterReceive[0].charID;
+		return `&{template:npcaction} {{name=Completed Transaction}} {{rname=${header}}} {{description=${desc}}}`;
 	};
 
-	function personalAdd(charID,msg,transCash,charCash){
-		let newCash = charCash + transCash;
-		setCharMoney(charID,newCash);
-
-		let character = getObj('character', charID);
-		let newCashString = moneyToString(newCash);
-		let transCashString = moneyToString(transCash);
-		let charCashString = moneyToString(charCash);
-		let msgText = `${character.get("name")} received ${transCashString}<br>`+
-		`Previous balance: ${charCashString}<br>`+
-		`New balance: ${newCashString}`;
-		chatter("w",["character",character],msgText,"{noarchive:true}");
-		chatter("w","gm",msgText,"{noarchive:true}");
+	function builtBankAppTemplate(charID,playerid){
+		let isGM = playerIsGM(playerid);
+		let from;
+		charID ? from = charID : from = "world";
+		let header = "";
+		let subHeader = "";
+		if(isGM && (!from || from == "world")){
+			header = "World Bank"
+		}
+		else if(from && from != "world"){
+			header = getObj('character', from).get("name");
+			subHeader = `Current Balance: ${getCharBalString(from)}`;
+		}
+		let desc = buildBankAppBtns(from,isGM);
+		return `&{template:npcaction} {{name=${subHeader}}} {{rname=${header}}} {{description=${desc}}}`;
 	};
 
-	function personalSub(charID,msg,transCash,charCash){
-		let newCash = charCash - transCash;
-		if(newCash<0){
-			chatter("w",msg.who,`You have insufficient money to do this. The transaction has been voided.`,"{noarchive:true}");
-			return;
-		};
-		setCharMoney(charID,newCash,transCash,charCash);
-
-		let character = getObj('character', charID);
-		let newCashString = moneyToString(newCash);
-		let transCashString = moneyToString(transCash);
-		let charCashString = moneyToString(charCash);
-		let msgText = `${character.get("name")} spent ${transCashString}<br>`+
-		`Previous balance: ${charCashString}<br>`+
-		`New balance: ${newCashString}`;
-		chatter("w",["character",character],msgText,"{noarchive:true}");
-		chatter("w","gm",msgText,"{noarchive:true}");
+	function buildBankAppBtns(from,isGM){
+		let btnSection = "";
+		if(from && from != "world"){
+			btnSection += btnContainer(from,false);
+		}
+		//if GM then btnContainer("world",true);
+		if(isGM){
+			btnSection ? btnSection += `<hr>` : false;
+			btnSection += btnContainer("world",true)
+		}
+		//warning about Platinum upscale
+		if(btnSection){
+			btnSection ? btnSection += `<hr>Please note that using the banking system will convert all money in your account into the most efficient form of currency, minimising total number of coins and overall weight.` : false;
+		}
+		return btnSection;
 	};
 
-	function arrayConversion(array){
-		//could add decimal handling by adjusting regex
-		let pp = parseInt(array.toString().match(/[0-9]+pp/));
-		let gp = parseInt(array.toString().match(/[0-9]+gp/));
-		let sp = parseInt(array.toString().match(/[0-9]+sp/));
-		let cp = parseInt(array.toString().match(/[0-9]+cp/));
-		!pp ? pp=0 : false;
-		!gp ? gp=0 : false;
-		!sp ? sp=0 : false;
-		!cp ? cp=0 : false;
-		return toCopper(pp,gp,sp,cp);
-	};
-
-	function toCopper(pp=0,gp=0,sp=0,cp0=0){
-		return cp + 10*sp + 100*gp + 1000*pp;
-	};
-
-	function getCharMoneyCP(charID){
+	function getCharBalString(charID){
 		let pp = parseInt(getAttrByName(charID,"pp"));
 		let gp = parseInt(getAttrByName(charID,"gp"));
 		let sp = parseInt(getAttrByName(charID,"sp"));
 		let cp = parseInt(getAttrByName(charID,"cp"));
-		!pp ? pp=0 : false;
-		!gp ? gp=0 : false;
-		!sp ? sp=0 : false;
-		!cp ? cp=0 : false;
-		return toCopper(pp,gp,sp,cp);
-	}
-
-	function fromCopper(cash){
-		let pp, gp, sp, cp;
-		[pp,gp,sp,cp] = [0,0,0,0];
-		pp += Math.floor(cash/1000);
-		cash %= 1000;
-		gp += Math.floor(cash/100);
-		cash %= 100;
-		sp += Math.floor(cash/10);
-		cash %= 10;
-		cp += cash;
-		return [pp,gp,sp,cp];
-	};
-
-	function setCharMoney(charID,newCash){
-		let [pp,gp,sp,cp] = fromCopper(newCash);
-		//pp
-		let ppAttr = findObjs({
-			_characterid: charID,
-			_type: "attribute",
-			name: "pp"
-		})[0];
-		ppAttr.set("current",pp);
-		//gp
-		let gpAttr = findObjs({
-			_characterid: charID,
-			_type: "attribute",
-			name: "gp"
-		})[0];
-		gpAttr.set("current",gp);
-		//sp
-		let spAttr = findObjs({
-			_characterid: charID,
-			_type: "attribute",
-			name: "sp"
-		})[0];
-		spAttr.set("current",sp);
-		//cp
-		let cpAttr = findObjs({
-			_characterid: charID,
-			_type: "attribute",
-			name: "cp"
-		})[0];
-		cpAttr.set("current",cp);
-
-		return;
-	};
-
-	function moneyToString(cash){
-		let [pp,gp,sp,cp] = fromCopper(cash);
 		let moneyString = ` `;
 		pp > 0 ? moneyString += `${pp}pp `: false;
 		gp > 0 ? moneyString += `${gp}gp `: false;
 		sp > 0 ? moneyString += `${sp}sp `: false;
 		cp > 0 ? moneyString += `${cp}cp `: false;
 		moneyString = moneyString.trim();
+		moneyString.length = 0 ? moneyString = "None" : false;
 		return moneyString;
+	};
+
+	function btnContainer(from,isGM) {
+		let btns = "";
+		if(!isGM){
+			btns += buildSelButton(`to PC`,buildBtnLink("send",from,null,null,null,null));
+			//btns += buildSelButton(`to PC (Split)`,buildBtnLink("send",from,null,null,null,"split"));
+			btns += buildSelButton(`to GM`,buildBtnLink("send",from,"world",null,null,null));
+			btns += buildSelButton(`to GM (Split)`,buildBtnLink("send",from,"world",null,null,"split"));
+		}
+		else if(isGM){
+			btns += buildSelButton(`GM to PC`,buildBtnLink("send","world",null,null,null,null));
+			btns += buildSelButton(`GM to PC (Split)`,buildBtnLink("send","world",null,null,null,"split"));
+		}
+		let btnContainerCSS = `display: block; box-sizing: border-box; width: 100%; text-align: center;`;
+		let btnContainer = `<div style="${btnContainerCSS}">${btns}</div>`;
+		return btnContainer;
+	};
+
+	function buildBtnLink(type,from,to,value,name,split){
+		let link = "!bankbot";
+		type ? link += ` --type ${type}` : link += ` --type ?{Send or request money|Send,send|Request,receive}`;
+		from ? link += ` --from ${from}` : link += ` --from @{selected|character_id}`;
+		to ? link += ` --to ${to}` : link += ` --to @{target|character_id}`;
+		value ? link += ` --value ${value}` : link += ` --value ?{Money involved (in the form '50pp 5cp' using pp, gp, sp, and cp)|0pp 0gp 0sp 0cp}`;
+		name ? link += ` --name ${name}` : link += ` --name ?{Transaction reason/name|}`;
+		split ? link += ` --split` : false;
+		return encodeHTML(link);
+	};
+
+	function encodeHTML(string){
+		//string = string.replace(/&/g,"&#38;");
+		//string = string.replace(/'/g,"&#39;");
+		string = string.replace(/@/g,"&#64;");
+		string = string.replace(/{/g,"&#123;");
+		//string = string.replace(/}/g,"&#125;");
+		//string = string.replace(/\|/g,"&#124;");
+		//string = string.replace(/\[/g,"&#91;");
+		//string = string.replace(/\]/g,"&#93;");
+		log(string);
+		return string;
+	};
+
+	function buildSelButton(btnName,btnCmd){
+		let span = `<span>${btnName}</span>`;
+		let linkCSS = `background-color: transparent; border: 0px; box-sizing: border-box; `;
+		let link = `<a style="${linkCSS}" href="${btnCmd}">${span}</a>`;
+		let btnCSS = `display: inline-block; width: 85%; aspect-ratio: 2 / 1; margin-left:auto; margin-right:auto; margin-bottom:5px; margin-top:5px; box-sizing: border-box; background-color: green; border: 1px solid #a0a0a0; padding: 10px; font-size: 1em; text-align: center;`;
+		let btn = `<div style="${btnCSS}">${link}</div>`;
+		return btn;
 	};
 
 	//error handler

@@ -517,36 +517,35 @@ NPC mass request PC  (GM only)
 		let prevBal;
 		if(sentOrReceive == "send"){
 			//from world
-			if(transaction.walletsAfterSend[0] == "world"){
+			if(transaction.walletsAfterSend[0] === "world"){
 				header = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${522/*LL*/}`);
-				desc += `You sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
+				desc += `You sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${526/*LL*/}`);
-				header = getObj('character', transaction.walletsAfterSend[0].charID).get("name");
-				newBal = transaction.walletsAfterSend[0].readBalance;
-				prevBal = transaction.walletsBeforeSend[0].readBalance;
-				desc += `${header} sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				header = transaction.walletsAfterSend[0].charname;
+				newBal = transaction.walletsAfterSend[0].readBalance();
+				prevBal = transaction.walletsBeforeSend[0].readBalance();
+				desc += `${header} sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
-		if(sentOrReceive == "receive"){
+		else if(sentOrReceive == "receive"){
 			//from world
-			if(transaction.walletsAfterReceive[0] == "world"){
+			log(transaction);
+			if(transaction.walletsAfterReceive[0] === "world"){
 				header = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${537/*LL*/}`);
-				desc += `${getObj('character', transaction.walletsAfterSend[0].charID).get("name")} sent you ${amount}.<hr>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
+				desc += `${transaction.walletsAfterSend[0].charName} sent you ${amount}.<hr>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${541/*LL*/}`);
-				header = getObj('character', transaction.walletsAfterReceive[0].charID).get("name");
-				newBal = transaction.walletsAfterReceive[0].readBalance;
-				prevBal = transaction.walletsBeforeReceive[0].readBalance;
-				desc += `${header} recieved ${amount} from ${getObj('character', transaction.walletsAfterSend[0].charID).get("name")}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				header = transaction.walletsAfterReceive[0].charName;
+				newBal = transaction.walletsAfterReceive[0].readBalance();
+				prevBal = transaction.walletsBeforeReceive[0].readBalance();
+				desc += `${header} recieved ${amount} from ${transaction.walletsAfterSend[0].charName}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
-		senderDetails = transaction.walletsAfterSend[0].charID;
-		receiverDetails = transaction.walletsAfterReceive[0].charID;
 		return `&{template:npcaction} {{name=${transaction.name}}} {{rname=${header}}} {{description=${desc}}}`;
 	};
 

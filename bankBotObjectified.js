@@ -397,7 +397,7 @@ NPC mass request PC  (GM only)
 	function doApp(args,msg){
 		let from = "world";
 		for (let flag of args) {
-			if(flag.cmd = "from"){
+			if(flag.cmd == "from"){
 				from = flag.params[0];
 			}
 		}
@@ -427,21 +427,21 @@ NPC mass request PC  (GM only)
 		transaction.complete();
 		//adjust this for more than one-to-one
 		let sender;
-		if(transaction.walletsAfterSend[0] = "world"){
+		if(transaction.walletsAfterSend[0] == "world"){
 			sender = "";
 		}
 		else{
 			sender = ["character",getObj('character', transaction.walletsAfterSend[0].charID)];
 		}
 		let receiver;
-		if(transaction.walletsAfterReceive[0] = "world"){
+		if(transaction.walletsAfterReceive[0] == "world"){
 			receiver = "";
 		}
 		else{
 			receiver = ["character",getObj('character', transaction.walletsAfterReceive[0].charID)];
 		}
-		chatter("w",sender,bankReceipt("send",sender,transaction));
-		chatter("w",receiver,bankReceipt("receive",receiver,transaction));
+		chatter("w",sender,bankReceipt("send",transaction));
+		chatter("w",receiver,bankReceipt("receive",transaction));
 	};
 
 	function parseArgs(args,who,isGM) {
@@ -509,7 +509,7 @@ NPC mass request PC  (GM only)
 		return transaction;
 	};
 
-	function bankReceipt(sentOrReceive,nullIfWorld,transaction){
+	function bankReceipt(sentOrReceive,transaction){
 		let header;
 		let desc = "";
 		let amount = transaction.walletExchange.readBalance();
@@ -517,11 +517,13 @@ NPC mass request PC  (GM only)
 		let prevBal;
 		if(sentOrReceive == "send"){
 			//from world
-			if(!(nullIfWorld.length > 0)){
+			if(transaction.walletsAfterSend[0] == "world"){
 				header = "World Bank";
-				desc += `You sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsAfterReceive[0].readBalance()}`
+				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${522/*LL*/}`);
+				desc += `You sent ${amount} to ${getObj('character', transaction.walletsAfterReceive[0].charID).get("name")}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
 			} //from PC
 			else{
+				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${526/*LL*/}`);
 				header = getObj('character', transaction.walletsAfterSend[0].charID).get("name");
 				newBal = transaction.walletsAfterSend[0].readBalance;
 				prevBal = transaction.walletsBeforeSend[0].readBalance;
@@ -530,11 +532,13 @@ NPC mass request PC  (GM only)
 		}
 		if(sentOrReceive == "receive"){
 			//from world
-			if(!(nullIfWorld.length > 0)){
+			if(transaction.walletsAfterReceive[0] == "world"){
 				header = "World Bank";
-				desc += `${getObj('character', transaction.walletsAfterSend[0].charID).get("name")} sent you ${amount}.`
+				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${537/*LL*/}`);
+				desc += `${getObj('character', transaction.walletsAfterSend[0].charID).get("name")} sent you ${amount}.<hr>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
 			} //from PC
 			else{
+				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${541/*LL*/}`);
 				header = getObj('character', transaction.walletsAfterReceive[0].charID).get("name");
 				newBal = transaction.walletsAfterReceive[0].readBalance;
 				prevBal = transaction.walletsBeforeReceive[0].readBalance;
@@ -543,7 +547,7 @@ NPC mass request PC  (GM only)
 		}
 		senderDetails = transaction.walletsAfterSend[0].charID;
 		receiverDetails = transaction.walletsAfterReceive[0].charID;
-		return `&{template:npcaction} {{name=Completed Transaction}} {{rname=${header}}} {{description=${desc}}}`;
+		return `&{template:npcaction} {{name=${transaction.name}}} {{rname=${header}}} {{description=${desc}}}`;
 	};
 
 	function builtBankAppTemplate(charID,playerid){

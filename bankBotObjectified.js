@@ -319,10 +319,10 @@ NPC mass request PC  (GM only)
 	class WalletPC extends Wallet{
 		constructor(charID){
 			super();
-			this._pp = sanitiseCoin(charID,"pp");
-			this._gp = sanitiseCoin(charID,"gp");
-			this._sp = sanitiseCoin(charID,"sp");
-			this._cp = sanitiseCoin(charID,"cp");
+			this._pp = WalletPC.sanitiseCoin(charID,"pp");
+			this._gp = WalletPC.sanitiseCoin(charID,"gp");
+			this._sp = WalletPC.sanitiseCoin(charID,"sp");
+			this._cp = WalletPC.sanitiseCoin(charID,"cp");
 			this._isChar = true;
 			this._charID = charID;
 			this._charName = getObj('character', charID).get("name");
@@ -378,7 +378,7 @@ NPC mass request PC  (GM only)
 				Number.isNaN(coinValue) ? false : coinValue = 0;
 			}
 			return coinValue;
-		}
+		};
 	};
 
 	//BEGIN THE ACTUAL FUNCTIONS

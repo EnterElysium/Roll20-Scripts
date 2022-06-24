@@ -172,7 +172,8 @@ NPC mass request PC  (GM only)
 			if(this.walletsAfterSend[0] == "world"){
 				if(!this._byGM){
 					//error cannot send money from world without being a GM
-					return;
+					errorHandler(this.who,`cannot send money from world without being a GM.`,true,true);
+					return "error";
 				}
 			} //else the senders are players and we can take the money from their wallets
 			else{
@@ -188,7 +189,7 @@ NPC mass request PC  (GM only)
 					if(!paid){
 						//ERROR not enough cash
 						errorHandler(this.who,`${getObj('character', wallet.charID).get("name")} does not have enough money to complete this transaction. Transaction voided.`,true,true);
-						return;
+						return "error";
 					}
 				}
 			}
@@ -454,7 +455,10 @@ NPC mass request PC  (GM only)
 	};
 
 	function transactionComplete(msg,transaction){
-		transaction.complete();
+		let error = transaction.complete();
+		if(error === "error"){
+			return;
+		}
 		//adjust this for more than one-to-one
 		let sender;
 		if(transaction.walletsAfterSend[0] == "world"){

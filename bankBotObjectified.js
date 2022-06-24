@@ -524,7 +524,7 @@ NPC mass request PC  (GM only)
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${526/*LL*/}`);
-				header = transaction.walletsAfterSend[0].charname;
+				header = transaction.walletsAfterSend[0].charName;
 				newBal = transaction.walletsAfterSend[0].readBalance();
 				prevBal = transaction.walletsBeforeSend[0].readBalance();
 				desc += `${header} sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`

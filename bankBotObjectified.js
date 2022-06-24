@@ -371,6 +371,7 @@ NPC mass request PC  (GM only)
 					current: 0,
 					characterid: charID,
 				});
+				coinValue = 0;
 			}
 			else{
 				coinValue = parseInt(coinValue,10);

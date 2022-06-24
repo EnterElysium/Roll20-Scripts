@@ -319,10 +319,10 @@ NPC mass request PC  (GM only)
 	class WalletPC extends Wallet{
 		constructor(charID){
 			super();
-			this._pp = parseInt(getAttrByName(charID,"pp"));
-			this._gp = parseInt(getAttrByName(charID,"gp"));
-			this._sp = parseInt(getAttrByName(charID,"sp"));
-			this._cp = parseInt(getAttrByName(charID,"cp"));
+			this._pp = sanitiseCoin(charID,"pp");
+			this._gp = sanitiseCoin(charID,"gp");
+			this._sp = sanitiseCoin(charID,"sp");
+			this._cp = sanitiseCoin(charID,"cp");
 			this._isChar = true;
 			this._charID = charID;
 			this._charName = getObj('character', charID).get("name");
@@ -363,6 +363,21 @@ NPC mass request PC  (GM only)
 			})[0];
 			cpAttr.set("current",this.cp);
 		};
+		static sanitiseCoin(charID,coin){
+			coin = getAttrByName(charID,coin);
+			if(coin === null){
+				createObj("attribute", {
+					name: coin,
+					current: 0,
+					characterid: charID,
+				});
+			}
+			else{
+				coin = parseInt(coin,10);
+				Number.isNaN(coin) ? false : coin = 0;
+			}
+			return coin;
+		}
 	};
 
 	//BEGIN THE ACTUAL FUNCTIONS
@@ -428,14 +443,14 @@ NPC mass request PC  (GM only)
 		//adjust this for more than one-to-one
 		let sender;
 		if(transaction.walletsAfterSend[0] == "world"){
-			sender = "";
+			sender = "gm";
 		}
 		else{
 			sender = ["character",getObj('character', transaction.walletsAfterSend[0].charID)];
 		}
 		let receiver;
 		if(transaction.walletsAfterReceive[0] == "world"){
-			receiver = "";
+			receiver = "gm";
 		}
 		else{
 			receiver = ["character",getObj('character', transaction.walletsAfterReceive[0].charID)];
@@ -510,43 +525,49 @@ NPC mass request PC  (GM only)
 	};
 
 	function bankReceipt(sentOrReceive,transaction){
-		let header;
+		let you;
+		let them = "";
 		let desc = "";
 		let amount = transaction.walletExchange.readBalance();
 		let newBal;
 		let prevBal;
+		log(transaction);
+		log(transaction.walletsAfterSend[0]);
+		log(transaction.walletsAfterReceive[0]);
 		if(sentOrReceive == "send"){
+			transaction.walletsAfterReceive[0] === "world" ? false : them = ` to ${transaction.walletsAfterReceive[0].charName}`
 			//from world
 			if(transaction.walletsAfterSend[0] === "world"){
-				header = "World Bank";
+				you = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${522/*LL*/}`);
 				desc += `You sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${526/*LL*/}`);
-				header = transaction.walletsAfterSend[0].charName;
+				you = transaction.walletsAfterSend[0].charName;
 				newBal = transaction.walletsAfterSend[0].readBalance();
 				prevBal = transaction.walletsBeforeSend[0].readBalance();
-				desc += `${header} sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				desc += `${you} sent ${amount}${them}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
 		else if(sentOrReceive == "receive"){
+			transaction.walletsAfterSend[0] === "world" ? false : them = ` from ${transaction.walletsAfterReceive[0].charName}`
 			//from world
 			log(transaction);
 			if(transaction.walletsAfterReceive[0] === "world"){
-				header = "World Bank";
+				you = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${537/*LL*/}`);
 				desc += `${transaction.walletsAfterSend[0].charName} sent you ${amount}.<hr>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${541/*LL*/}`);
-				header = transaction.walletsAfterReceive[0].charName;
+				you = transaction.walletsAfterReceive[0].charName;
 				newBal = transaction.walletsAfterReceive[0].readBalance();
 				prevBal = transaction.walletsBeforeReceive[0].readBalance();
-				desc += `${header} recieved ${amount} from ${transaction.walletsAfterSend[0].charName}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				desc += `${you} received ${amount}${them}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
-		return `&{template:npcaction} {{name=${transaction.name}}} {{rname=${header}}} {{description=${desc}}}`;
+		return `&{template:npcaction} {{name=${transaction.name}}} {{rname=${you}}} {{description=${desc}}}`;
 	};
 
 	function builtBankAppTemplate(charID,playerid){

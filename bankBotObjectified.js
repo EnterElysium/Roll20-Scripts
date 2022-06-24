@@ -161,6 +161,13 @@ NPC mass request PC  (GM only)
 			return "unknown error";
 		}
 		complete(){
+			//make previous balances into the same format
+			for (let wallet of this.walletsBeforeSend){
+				wallet.setBalance(wallet.getBalance());
+			}
+			for (let wallet of this.walletsBeforeReceive){
+				wallet.setBalance(wallet.getBalance());
+			}
 			//check if world sender then confirm they are gm
 			if(this.walletsAfterSend[0] == "world"){
 				if(!this._byGM){
@@ -364,8 +371,12 @@ NPC mass request PC  (GM only)
 			cpAttr.set("current",this.cp);
 		};
 		static sanitiseCoin(charID,coin){
-			let coinValue = getAttrByName(charID,coin);
-			if(coinValue === null){
+			let coinObj = findObjs({
+				_characterid: charID,
+				name: coin,
+			})[0];
+			let coinValue;
+			if(!coinObj){
 				createObj("attribute", {
 					name: coin,
 					current: 0,
@@ -374,9 +385,12 @@ NPC mass request PC  (GM only)
 				coinValue = 0;
 			}
 			else{
-				coinValue = parseInt(coinValue,10);
-				Number.isNaN(coinValue) ? false : coinValue = 0;
+				coinValue = parseInt(getAttrByName(charID,coin),10);
+				log(coinValue);
+				Number.isNaN(coinValue) ? coinValue = 0 : false;
+				log(coinValue);
 			}
+			log(coinValue);
 			return coinValue;
 		};
 	};

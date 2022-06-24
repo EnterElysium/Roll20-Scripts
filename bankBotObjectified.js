@@ -364,8 +364,8 @@ NPC mass request PC  (GM only)
 			cpAttr.set("current",this.cp);
 		};
 		static sanitiseCoin(charID,coin){
-			coin = getAttrByName(charID,coin);
-			if(coin === null){
+			let coinValue = getAttrByName(charID,coin);
+			if(coinValue === null){
 				createObj("attribute", {
 					name: coin,
 					current: 0,
@@ -373,10 +373,10 @@ NPC mass request PC  (GM only)
 				});
 			}
 			else{
-				coin = parseInt(coin,10);
-				Number.isNaN(coin) ? false : coin = 0;
+				coinValue = parseInt(coinValue,10);
+				Number.isNaN(coinValue) ? false : coinValue = 0;
 			}
-			return coin;
+			return coinValue;
 		}
 	};
 

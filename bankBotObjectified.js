@@ -555,14 +555,14 @@ NPC mass request PC  (GM only)
 			if(transaction.walletsAfterSend[0] === "world"){
 				you = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${522/*LL*/}`);
-				desc += `You sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<hr>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
+				desc += `You sent ${amount} to ${transaction.walletsAfterReceive[0].charName}.<div class="sheet-arrow-right"></div>Their new balance: ${transaction.walletsAfterReceive[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeReceive[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${526/*LL*/}`);
 				you = transaction.walletsAfterSend[0].charName;
 				newBal = transaction.walletsAfterSend[0].readBalance();
 				prevBal = transaction.walletsBeforeSend[0].readBalance();
-				desc += `${you} sent ${amount}${them}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				desc += `${you} sent ${amount}${them}.<div class="sheet-arrow-right"></div>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
 		else if(sentOrReceive == "receive"){
@@ -572,14 +572,14 @@ NPC mass request PC  (GM only)
 			if(transaction.walletsAfterReceive[0] === "world"){
 				you = "World Bank";
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${537/*LL*/}`);
-				desc += `${transaction.walletsAfterSend[0].charName} sent you ${amount}.<hr>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
+				desc += `${transaction.walletsAfterSend[0].charName} sent you ${amount}.<div class="sheet-arrow-right"></div>Their new balance: ${transaction.walletsAfterSend[0].readBalance()}<br>Their previous balance: ${transaction.walletsBeforeSend[0].readBalance()}`
 			} //from PC
 			else{
 				log(`${!scriptIndex || !scriptIndex.name ? "Unknown script" : scriptIndex.name} reports in at line ${541/*LL*/}`);
 				you = transaction.walletsAfterReceive[0].charName;
 				newBal = transaction.walletsAfterReceive[0].readBalance();
 				prevBal = transaction.walletsBeforeReceive[0].readBalance();
-				desc += `${you} received ${amount}${them}.<hr>New balance: ${newBal}<br>Previous balance: ${prevBal}`
+				desc += `${you} received ${amount}${them}.<div class="sheet-arrow-right"></div>New balance: ${newBal}<br>Previous balance: ${prevBal}`
 			}
 		}
 		return `&{template:npcaction} {{name=${transaction.name}}} {{rname=${you}}} {{description=${desc}}}`;
@@ -609,12 +609,12 @@ NPC mass request PC  (GM only)
 		}
 		//if GM then btnContainer("world",true);
 		if(isGM){
-			btnSection ? btnSection += `<hr>` : false;
+			btnSection ? btnSection += `<div class="sheet-arrow-right"></div>` : false;
 			btnSection += btnContainer("world",true)
 		}
 		//warning about Platinum upscale
 		if(btnSection){
-			btnSection ? btnSection += `<hr>Please note that using the banking system will convert all money in your account into the most efficient form of currency, minimising total number of coins and overall weight.` : false;
+			btnSection ? btnSection += `<div class="sheet-arrow-right"></div><div class="sheet-row sheet-subheader"><span class="sheet-italics">Please note that using the banking system will convert all money in your account into the most efficient form of currency, minimising total number of coins and overall weight.<span><div>` : false;
 		}
 		return btnSection;
 	};
@@ -646,7 +646,7 @@ NPC mass request PC  (GM only)
 			btns += buildSelButton(`GM to PC`,buildBtnLink("send","world",null,null,null,null));
 			btns += buildSelButton(`GM to PC (Split)`,buildBtnLink("send","world",null,null,null,"split"));
 		}
-		let btnContainerCSS = `display: block; box-sizing: border-box; width: 100%; text-align: center;`;
+		let btnContainerCSS = `display: block; box-sizing: border-box; width: 198px; text-align: center; margin-left:-5px; margin-right:-5px;`;
 		let btnContainer = `<div style="${btnContainerCSS}">${btns}</div>`;
 		return btnContainer;
 	};
@@ -676,10 +676,10 @@ NPC mass request PC  (GM only)
 	};
 
 	function buildSelButton(btnName,btnCmd){
-		let span = `<span>${btnName}</span>`;
-		let linkCSS = `background-color: transparent; border: 0px; box-sizing: border-box; `;
+		let span = `<span style="/*color: #ce0f69;*/ vertical-align:middle; display: table-cell; padding: 5px;">${btnName}</span>`;
+		let linkCSS = `background-color: transparent; border: 0px; display:table-row;`;
 		let link = `<a style="${linkCSS}" href="${btnCmd}">${span}</a>`;
-		let btnCSS = `display: inline-block; width: 85%; aspect-ratio: 2 / 1; margin-left:auto; margin-right:auto; margin-bottom:5px; margin-top:5px; box-sizing: border-box; background-color: green; border: 1px solid #a0a0a0; padding: 10px; font-size: 1em; text-align: center;`;
+		let btnCSS = `font-style: italic; font-size: 1.1em; border-radius: 3px; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; margin:3px; background-color: #7e2d40; border: 2px solid #955060; text-align: center; display: inline-table; width: 88px; height: 60px;`;
 		let btn = `<div style="${btnCSS}">${link}</div>`;
 		return btn;
 	};

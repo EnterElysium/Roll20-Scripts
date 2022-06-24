@@ -20,13 +20,22 @@ const tipPost = (function() {
 
 	};
 
+	//error handler
+	function errorHandler(errorMsg,who,useChat,useLog){
+		useLog === false ? log(errorMsg) : false;
+		useChat === false ? sendChat(`${scriptIndex.name} Error`,errorMsg,null,{noarchive:true}) : false;
+		useLog === true ? logger(errorMsg) : false;
+		useChat === true ? chatter(errorMsg,"w",who,"noarchive") : false;
+		return;
+	}
+
 	//log stuff
     function logger(logtext){
         log(scriptIndex.name+", "+scriptIndex.version+": "+logtext);
     };
 
 	//chat bullocks
-    function chatter(spkAs,slashCom,whisperTo,msgText,options){
+    function chatter(msgText,slashCom,whisperTo,options,spkAs){
 		if(slashCom && slashCom.toLowerCase() == "w"){
 			if(typeof whisperTo === "string"){
 				whisperTo = whisperTo.replace(/\(GM\)/, '').trim();
@@ -67,7 +76,7 @@ const tipPost = (function() {
 		//slashCom ? msgContents = msgContents.concat(`/${slashCom}`) : false ;
 		//whisperTo && slashCom == "w" ? msgContents = msgContents.concat(` ${whisperTo}`) : false ;
         msgText ? msgContents = msgContents.concat(` ${msgText}`) : logger("chat request but no msgText specified") ;
-        options ? options = JSON.parse(options) : false ;
+        options == "noarchive" ? options = {noarchive:true} : false ;
         sendChat(spkAs,msgContents,null,options);
     };
 

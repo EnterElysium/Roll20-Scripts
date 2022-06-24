@@ -163,10 +163,10 @@ NPC mass request PC  (GM only)
 		complete(){
 			//make previous balances into the same format
 			for (let wallet of this.walletsBeforeSend){
-				wallet.setBalance(wallet.getBalance());
+				wallet === "world" ? false : wallet.setBalance(wallet.getBalance());
 			}
 			for (let wallet of this.walletsBeforeReceive){
-				wallet.setBalance(wallet.getBalance());
+				wallet === "world" ? false : wallet.setBalance(wallet.getBalance());
 			}
 			//check if world sender then confirm they are gm
 			if(this.walletsAfterSend[0] == "world"){

@@ -644,11 +644,11 @@ NPC mass request PC  (GM only)
 			btns += buildSelButton(`to PC`,buildBtnLink("send",from,null,null,null,null));
 			//btns += buildSelButton(`to PC (Split)`,buildBtnLink("send",from,null,null,null,"split"));
 			btns += buildSelButton(`to GM`,buildBtnLink("send",from,"world",null,null,null));
-			btns += buildSelButton(`to GM (Split)`,buildBtnLink("send",from,"world",null,null,"split"));
+			//btns += buildSelButton(`to GM (Split)`,buildBtnLink("send",from,"world",null,null,"split"));
 		}
 		else if(isGM){
 			btns += buildSelButton(`GM to PC`,buildBtnLink("send","world",null,null,null,null));
-			btns += buildSelButton(`GM to PC (Split)`,buildBtnLink("send","world",null,null,null,"split"));
+			//btns += buildSelButton(`GM to PC (Split)`,buildBtnLink("send","world",null,null,null,"split"));
 		}
 		let btnContainerCSS = `display: block; box-sizing: border-box; width: 198px; text-align: center; margin-left:-5px; margin-right:-5px;`;
 		let btnContainer = `<div style="${btnContainerCSS}">${btns}</div>`;

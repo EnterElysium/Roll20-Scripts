@@ -90,36 +90,42 @@ const hpBarHandout = (function() {
 			charHPs.push(charHP);
 		}
 		log(charHPs);
-		let handoutContent = "";
+		let handoutContent = `<div id="hpHandout">`;
 		for (let charHP of charHPs){
 			let name = `${charHP.name}<br>`;
-			let hpBarInner;
-			let hpBarDelta = "";
+			let pushCSS = `height:100%;`;
+			let flexCSS = `height:100%; display:inline-block; background-color: rgb(200,0,0);`;
+			let stateClass = "";
 			//if HP has decreaesed
 			if(charHP.changed && charHP.hpNew < charHP.hpOld){
-				hpBarInner = `<div class="hpBarIn" style="display:inline-block; height: 100%; width: ${toPerCSS(charHP.hpNewPercent)};"></div>`;
-				hpBarDelta = `<div class="hpBarDelta hpdec" style="display:inline-block; height: 100%; width: ${toPerCSS(charHP.hpDeltaPercent)};"></div>`;
+				stateClass = "dec";
+				pushCSS += ` display:inline-block; width:0px;`;
+				flexCSS += ` min-width: ${toPerCSS(charHP.hpNewPercent)}; max-width: ${toPerCSS(charHP.hpOldPercent)};`;
 			} //if HP has increased
 			else if(charHP.changed && charHP.hpNew > charHP.hpOld){
-				hpBarInner = `<div class="hpBarIn" style="display:inline-block; height: 100%; width: ${toPerCSS(charHP.hpOldPercent)};"></div>`;
-				hpBarDelta = `<div class="hpBarDelta hpinc" style="display:inline-block; height: 100%; width: ${toPerCSS(charHP.hpDeltaPercent)};"></div>`;
-				
+				stateClass = "inc";
+				pushCSS += ` display:inline-block; width:500px;`;
+				flexCSS += ` min-width: ${toPerCSS(charHP.hpOldPercent)}; max-width: ${toPerCSS(charHP.hpNewPercent)};`;
 			}
 			else{ //if HP the same (or not changed)
-				hpBarInner = `<div class="hpBarIn" style="display:inline-block; height: 100%; width: ${toPerCSS(charHP.hpOldPercent)};"></div>`;
+				stateClass = "none";
+				pushCSS += ` display:none;`;
+				flexCSS += ` width: ${toPerCSS(charHP.hpNewPercent)};`;
 			}
-			let hpBarCur = `<div class="hpBarCur delta${charHP.changed}" style="font-size: 50px; display:inline; background-color:red;">${hpBarInner}${hpBarDelta}</div>`;
-			let hpBarMax = `<div class="hpBarMax" style="height: 50px; width: 100%;">${hpBarCur}</div><br>`;
+			let hpBarPush = `<div class="hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
+			let hpBarFlex = `<div class="hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;
+			let hpBarMax = `<div class="hpBarMax ${stateClass}" style="width:500px; height:50px; background-color:#f1f1f1;">${hpBarFlex}</div>`;
 			handoutContent += `${name}${hpBarMax}<br>`;
 		}
+		handoutContent += `</div>`;
 		let handout = getHandout();
 		handout.set('notes',handoutContent);
 	};
 
 	function toPerCSS(num){
 		num = Math.abs(num);
-		//num = Math.round(num);
-		//num = num.toString();
+		num = Math.round(num);
+		num = num.toString();
 		num += `%`
 		return num;
 	};

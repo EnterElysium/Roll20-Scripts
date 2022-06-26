@@ -90,31 +90,46 @@ const hpBarHandout = (function() {
 			charHPs.push(charHP);
 		}
 		log(charHPs);
-		let handoutContent = `<div id="hpHandout">`;
+		let handoutContent = `<div class="hpHandout cast${charHPs.length+1}" style="height:1080px;	width:1920px;">`;
 		for (let charHP of charHPs){
-			let name = `${charHP.name}<br>`;
+			let charNum = `pc${charHPs.indexOf(charHP)+1}`;
+			let name = `<p class="name ${charNum}" style="display:block">${charHP.name}</p>`;
 			let pushCSS = `height:100%;`;
 			let flexCSS = `height:100%; display:inline-block; background-color: rgb(200,0,0);`;
 			let stateClass = "";
-			//if HP has decreaesed
+			let dmgfloat = ``;
+			//are we inc or dec (or none)?
 			if(charHP.changed && charHP.hpNew < charHP.hpOld){
 				stateClass = "dec";
+			}
+			else if(charHP.changed && charHP.hpNew > charHP.hpOld){
+				stateClass = "inc";
+			}
+			else{
+				stateClass = "none";
+			}
+			//dmg floaties
+			if (charHP.changed){
+				dmgfloat = charHP.hpDelta < 0 ? `-` : `+`;
+				dmgfloat += Math.abs(charHP.hpDelta).toString();
+				dmgfloat = `<div class="${charNum} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(charHP.hpOldPercent)}"><p class="${charNum} dmgfloat ${stateClass}">${dmgfloat}</p></div>`
+			}
+			//if HP has decreaesed
+			if(charHP.changed && charHP.hpNew < charHP.hpOld){
 				pushCSS += ` display:inline-block; width:0px;`;
 				flexCSS += ` min-width: ${toPerCSS(charHP.hpNewPercent)}; max-width: ${toPerCSS(charHP.hpOldPercent)};`;
 			} //if HP has increased
 			else if(charHP.changed && charHP.hpNew > charHP.hpOld){
-				stateClass = "inc";
 				pushCSS += ` display:inline-block; width:500px;`;
 				flexCSS += ` min-width: ${toPerCSS(charHP.hpOldPercent)}; max-width: ${toPerCSS(charHP.hpNewPercent)};`;
 			}
 			else{ //if HP the same (or not changed)
-				stateClass = "none";
 				pushCSS += ` display:none;`;
 				flexCSS += ` width: ${toPerCSS(charHP.hpNewPercent)};`;
 			}
-			let hpBarPush = `<div class="hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
-			let hpBarFlex = `<div class="hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;
-			let hpBarMax = `<div class="hpBarMax ${stateClass}" style="width:500px; height:50px; background-color:#f1f1f1;">${hpBarFlex}</div>`;
+			let hpBarPush = `<div class="${charNum} hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
+			let hpBarFlex = `<div class="${charNum} hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;
+			let hpBarMax = `<div class="${charNum} hpBarMax ${stateClass}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${hpBarFlex}</div>`;
 			handoutContent += `${name}${hpBarMax}<br>`;
 		}
 		handoutContent += `</div>`;

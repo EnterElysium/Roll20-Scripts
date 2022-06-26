@@ -4,28 +4,67 @@ const hpBarHandout = (function() {
 
 	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
 
-	class CharHP{
+	class Char{
 		constructor(id,charNew,charOld){
 			this._id = id;
 			this._name = getObj('character', id).get("name");
-			if (id == charNew.get("characterid")){
-				this._changed = true;
-				this._hpNewMax = CharHP.sanitiseHP(charNew.get("max"));
-				this._hpNew = CharHP.capBounds(CharHP.sanitiseHP(charNew.get("current")),this.hpNewMax);
-				this._hpOldMax = CharHP.sanitiseHP(charOld["max"]);
-				this._hpOld = CharHP.capBounds(CharHP.sanitiseHP(charOld["current"]),this.hpOldMax);
+			if (charNew && charNew.get("name") === "hp" && id == charNew.get("characterid")){
+				this._changedHP = true;
+				this._hpNewMax = Char.sanitiseHP(charNew.get("max"));
+				this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.get("current")),this.hpNewMax);
+				this._hpOldMax = Char.sanitiseHP(charOld["max"]);
+				this._hpOld = Char.capBounds(Char.sanitiseHP(charOld["current"]),this.hpOldMax);
 			}
 			else{
-				this._changed = false;
+				this._changedHP = false;
 				let attrHP = findObjs({
 					_characterid: id,
 					_type: "attribute",
 					name: "hp"
 				})[0];
-				this._hpNewMax = CharHP.sanitiseHP(attrHP.get("max"));
-				this._hpNew = CharHP.capBounds(CharHP.sanitiseHP(attrHP.get("current")),this.hpNewMax);
+				this._hpNewMax = Char.sanitiseHP(attrHP.get("max"));
+				this._hpNew = Char.capBounds(Char.sanitiseHP(attrHP.get("current")),this.hpNewMax);
 				this._hpOldMax = this.hpNewMax;
 				this._hpOld = this.hpNew;
+			}
+			this._changedDS = false;
+			this._dsNewSucc = 0;
+			this._dsNewFail = 0;
+			this._dsOldSucc = 0;
+			this._dsOldFail = 0;
+			for(let i = 1;i<=3;i++){
+				let dss =findObjs({
+					_characterid: id,
+					_type:"attribute",
+					name:`deathsave_succ${i}`
+				})[0]
+				let dsf =findObjs({
+					_characterid: id,
+					_type:"attribute",
+					name:`deathsave_fail${i}`
+				})[0]
+				if(charNew && id == charNew.get("characterid") && charNew.get("name") === `deathsave_succ${i}`){
+					dss = [charNew.get(`current`),charOld[`current`]];
+					this._dsNewSucc += !!dss[0] ? 1 : 0;
+					this._dsOldSucc += !!dss[1] ? 1 : 0;
+					this._changedDS = true;
+				}
+				else{
+					dss.get("current")
+					this._dsNewSucc += !!dss ? 1 : 0;
+					this._dsOldSucc += !!dss ? 1 : 0;
+				}
+				if(charNew && id == charNew.get("characterid") && charNew.get("name") === `deathsave_fail${i}`){
+					dsf = [charNew.get(`current`),charOld[`current`]];
+					this._dsNewFail += !!dsf[0] ? 1 : 0;
+					this._dsOldFail += !!dsf[1] ? 1 : 0;
+					this._changedDS = true;
+				}
+				else{
+					dsf.get("current")
+					this._dsNewFail += !!dsf ? 1 : 0;
+					this._dsOldFail += !!dsf ? 1 : 0;
+				}
 			}
 		}
 		get id() {
@@ -34,8 +73,8 @@ const hpBarHandout = (function() {
 		get name() {
 			return this._name;
 		}
-		get changed() {
-			return this._changed;
+		get changedHP() {
+			return this._changedHP;
 		}
 		get hpNew() {
 			return this._hpNew;
@@ -61,6 +100,21 @@ const hpBarHandout = (function() {
 		get hpOldPercent(){
 			return 100*this.hpOld/this.hpOldMax;
 		}
+		get changedDS() {
+			return this._changedDS;
+		}
+		get dsNewSucc() {
+			return this._dsNewSucc;
+		}
+		get dsNewFail() {
+			return this._dsNewFail;
+		}
+		get dsOldSucc() {
+			return this._dsOldSucc;
+		}
+		get dsOldFail() {
+			return this._dsOldFail;
+		}
 		static capBounds(num,max){
 			num < 0 ? num = 0 : false ;
 			num > max ? num = max : false ;
@@ -78,54 +132,57 @@ const hpBarHandout = (function() {
 			return;
 		}
 		if(obj.get("name") === "hp" && prev["name"] === "hp"){
-			updateHPs(obj, prev);
+			updateHandout(obj, prev);
+			return;
+		}
+		if(obj.get("name").toLowerCase().includes("deathsave") && prev["name"].toLowerCase().includes("deathsave")){
+			updateHandout(obj, prev);
+			return;
 		}
 	});
 
-	function updateHPs(obj, prev){
-		let charHPs = [];
-		log(ids);
+	function updateHandout(obj, prev){
+		let chars = [];
 		for (let id of ids){
-			let charHP = new CharHP(id,obj,prev);
-			charHPs.push(charHP);
+			let char = new Char(id,obj,prev);
+			chars.push(char);
 		}
-		log(charHPs);
-		let handoutContent = `<div class="hpHandout cast${charHPs.length+1}" style="height:1080px;	width:1920px;">`;
-		for (let charHP of charHPs){
-			let charNum = `pc${charHPs.indexOf(charHP)+1}`;
-			let name = `<p class="name ${charNum}" style="display:block">${charHP.name}</p>`;
+		let handoutContent = `<div class="hpHandout cast${chars.length+1}" style="height:1080px;	width:1920px;">`;
+		for (let char of chars){
+			let charNum = `pc${chars.indexOf(char)+1}`;
+			let name = `<p class="name ${charNum}" style="display:block">${char.name}</p>`;
 			let pushCSS = `height:100%;`;
 			let flexCSS = `height:100%; display:inline-block; background-color: rgb(200,0,0);`;
 			let stateClass = "";
 			let dmgfloat = ``;
 			//are we inc or dec (or none)?
-			if(charHP.changed && charHP.hpNew < charHP.hpOld){
+			if(char.changedHP && char.hpNew < char.hpOld){
 				stateClass = "dec";
 			}
-			else if(charHP.changed && charHP.hpNew > charHP.hpOld){
+			else if(char.changedHP && char.hpNew > char.hpOld){
 				stateClass = "inc";
 			}
 			else{
 				stateClass = "none";
 			}
 			//dmg floaties
-			if (charHP.changed){
-				dmgfloat = charHP.hpDelta < 0 ? `-` : `+`;
-				dmgfloat += Math.abs(charHP.hpDelta).toString();
-				dmgfloat = `<div class="${charNum} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(charHP.hpOldPercent)}"><p class="${charNum} dmgfloat ${stateClass}">${dmgfloat}</p></div>`
+			if (char.changedHP){
+				dmgfloat = char.hpDelta < 0 ? `-` : `+`;
+				dmgfloat += Math.abs(char.hpDelta).toString();
+				dmgfloat = `<div class="${charNum} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="${charNum} dmgfloat ${stateClass}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDelta)/3,50)+25}px;">${dmgfloat}</p></div>`
 			}
 			//if HP has decreaesed
-			if(charHP.changed && charHP.hpNew < charHP.hpOld){
+			if(char.changedHP && char.hpNew < char.hpOld){
 				pushCSS += ` display:inline-block; width:0px;`;
-				flexCSS += ` min-width: ${toPerCSS(charHP.hpNewPercent)}; max-width: ${toPerCSS(charHP.hpOldPercent)};`;
+				flexCSS += ` min-width: ${toPerCSS(char.hpNewPercent)}; max-width: ${toPerCSS(char.hpOldPercent)};`;
 			} //if HP has increased
-			else if(charHP.changed && charHP.hpNew > charHP.hpOld){
+			else if(char.changedHP && char.hpNew > char.hpOld){
 				pushCSS += ` display:inline-block; width:500px;`;
-				flexCSS += ` min-width: ${toPerCSS(charHP.hpOldPercent)}; max-width: ${toPerCSS(charHP.hpNewPercent)};`;
+				flexCSS += ` min-width: ${toPerCSS(char.hpOldPercent)}; max-width: ${toPerCSS(char.hpNewPercent)};`;
 			}
 			else{ //if HP the same (or not changed)
 				pushCSS += ` display:none;`;
-				flexCSS += ` width: ${toPerCSS(charHP.hpNewPercent)};`;
+				flexCSS += ` width: ${toPerCSS(char.hpNewPercent)};`;
 			}
 			let hpBarPush = `<div class="${charNum} hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
 			let hpBarFlex = `<div class="${charNum} hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;

@@ -1,15 +1,51 @@
 const hpBarHandout = (function() {	
 
-	const scriptIndex = {"name":"hpBarHandout","version":"v0.01",};
+	const scriptIndex = {"name":"StreamInfo","version":"v0.01",};
 
 	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
+
+	class Changed{
+		constructor(obj, prev){
+			this._chars = [];
+			this._what = false;
+			for (let id of ids) {
+				let char = new Char(id, obj, prev);
+				if(char.changed){
+					this._who = id;
+					char.changedHP ? this._what = "hp" : false;
+					char.changedDS ? this._what = "ds" : false;
+					char.changedInit ? this._what = "init" : false;
+				}
+				this._chars.push(char);
+			}
+		}
+		get chars(){
+			return this._chars;
+		}
+		get who(){
+			return this._who;
+		}
+		get what(){
+			return this._what;
+		}
+	}
 
 	class Char{
 		constructor(id,charNew,charOld){
 			this._id = id;
+			this._rank = [ids.indexOf(id)+1,ids.length];
 			this._name = getObj('character', id).get("name");
+			//hp construction
 			if (charNew && charNew.get("name") === "hp" && id == charNew.get("characterid")){
 				this._changedHP = true;
+				this._hpDeltaTrue = Char.sanitiseHP(charNew.get("current")) - Char.sanitiseHP(charOld["current"]);
+				//bound reset ignore
+				if(Char.sanitiseHP(charNew.get("current")) == 0 && Char.sanitiseHP(charOld["current"]) <= 0){
+					this._changedHP = false;
+				}
+				else if(Char.sanitiseHP(charNew.get("current")) == Char.sanitiseHP(charNew.get("max")) && Char.sanitiseHP(charOld["current"]) >= Char.sanitiseHP(charNew.get("max"))){
+					this._changedHP = false;
+				}
 				this._hpNewMax = Char.sanitiseHP(charNew.get("max"));
 				this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.get("current")),this.hpNewMax);
 				this._hpOldMax = Char.sanitiseHP(charOld["max"]);
@@ -17,6 +53,7 @@ const hpBarHandout = (function() {
 			}
 			else{
 				this._changedHP = false;
+				this._hpDeltaTrue = 0;
 				let attrHP = findObjs({
 					_characterid: id,
 					_type: "attribute",
@@ -27,6 +64,7 @@ const hpBarHandout = (function() {
 				this._hpOldMax = this.hpNewMax;
 				this._hpOld = this.hpNew;
 			}
+			//deathsave construction
 			this._changedDS = false;
 			this._dsNewSucc = 0;
 			this._dsNewFail = 0;
@@ -66,9 +104,17 @@ const hpBarHandout = (function() {
 					this._dsOldFail += !!dsf ? 1 : 0;
 				}
 			}
+			//initiative construction
+			this._changedInit = false;
 		}
 		get id() {
 			return this._id;
+		}
+		get rank() {
+			return this._rank;
+		}
+		get myRank() {
+			return this._rank[0];
 		}
 		get name() {
 			return this._name;
@@ -90,6 +136,9 @@ const hpBarHandout = (function() {
 		}
 		get hpDelta() {
 			return this.hpNew-this.hpOld;
+		}
+		get hpDeltaTrue() {
+			return this._hpDeltaTrue;
 		}
 		get hpDeltaPercent() {
 			return this.hpNewPercent-this.hpOldPercent;
@@ -114,6 +163,15 @@ const hpBarHandout = (function() {
 		}
 		get dsOldFail() {
 			return this._dsOldFail;
+		}
+		get changedInit() {
+			return this._changedInit;
+		}
+		get changed() {
+			if(this.changedHP || this.changedDS || this.changedInit){
+				return true;
+			}
+			return false;
 		}
 		static capBounds(num,max){
 			num < 0 ? num = 0 : false ;
@@ -141,58 +199,88 @@ const hpBarHandout = (function() {
 		}
 	});
 
-	function updateHandout(obj, prev){
-		let chars = [];
-		for (let id of ids){
-			let char = new Char(id,obj,prev);
-			chars.push(char);
+	on("change:campaign:turnorder", function(obj, prev) {
+		if(!obj.get('initiativepage')){
+			return;
 		}
+		else{
+
+		}
+		log(obj);
+		log(prev);
+		// if(!obj || !prev){
+		// 	return;
+		// }
+		// if(){
+		// 	updateHandout(obj, prev);
+		// 	return;
+		// }
+	});
+
+	function updateHandout(obj, prev){
+		let changed= new Changed(obj,prev);
+		let chars = changed.chars;
+		log(changed);
 		let handoutContent = `<div class="hpHandout cast${chars.length+1}" style="height:1080px;	width:1920px;">`;
-		for (let char of chars){
-			let charNum = `pc${chars.indexOf(char)+1}`;
+		handoutContent += hpContent(chars);
+		handoutContent += turnOutlineContent(chars);
+		handoutContent += `</div>`;
+		let handout = getHandout();
+		handout.set('notes',handoutContent);
+	};
+
+	function hpContent(chars) {
+		let hpContent = ``;
+		for (let char of chars) {
+			let charNum = `pc${chars.indexOf(char) + 1}`;
 			let name = `<p class="name ${charNum}" style="display:block">${char.name}</p>`;
 			let pushCSS = `height:100%;`;
 			let flexCSS = `height:100%; display:inline-block; background-color: rgb(200,0,0);`;
 			let stateClass = "";
 			let dmgfloat = ``;
 			//are we inc or dec (or none)?
-			if(char.changedHP && char.hpNew < char.hpOld){
+			if (char.changedHP && char.hpNew < char.hpOld) {
 				stateClass = "dec";
 			}
-			else if(char.changedHP && char.hpNew > char.hpOld){
+			else if (char.changedHP && char.hpNew > char.hpOld) {
 				stateClass = "inc";
 			}
-			else{
+			else {
 				stateClass = "none";
 			}
 			//dmg floaties
-			if (char.changedHP){
-				dmgfloat = char.hpDelta < 0 ? `-` : `+`;
-				dmgfloat += Math.abs(char.hpDelta).toString();
-				dmgfloat = `<div class="${charNum} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="${charNum} dmgfloat ${stateClass}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDelta)/3,50)+25}px;">${dmgfloat}</p></div>`
+			if (char.changedHP) {
+				dmgfloat = char.hpDeltaTrue < 0 ? `-` : `+`;
+				dmgfloat += Math.abs(char.hpDeltaTrue).toString();
+				dmgfloat = `<div class="${charNum} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="${charNum} dmgfloat ${stateClass}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDeltaTrue) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
 			}
 			//if HP has decreaesed
-			if(char.changedHP && char.hpNew < char.hpOld){
+			if (char.changedHP && char.hpNew < char.hpOld) {
 				pushCSS += ` display:inline-block; width:0px;`;
 				flexCSS += ` min-width: ${toPerCSS(char.hpNewPercent)}; max-width: ${toPerCSS(char.hpOldPercent)};`;
 			} //if HP has increased
-			else if(char.changedHP && char.hpNew > char.hpOld){
+			else if (char.changedHP && char.hpNew > char.hpOld) {
 				pushCSS += ` display:inline-block; width:500px;`;
 				flexCSS += ` min-width: ${toPerCSS(char.hpOldPercent)}; max-width: ${toPerCSS(char.hpNewPercent)};`;
 			}
-			else{ //if HP the same (or not changed)
+			else { //if HP the same (or not changed)
 				pushCSS += ` display:none;`;
 				flexCSS += ` width: ${toPerCSS(char.hpNewPercent)};`;
 			}
 			let hpBarPush = `<div class="${charNum} hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
 			let hpBarFlex = `<div class="${charNum} hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;
 			let hpBarMax = `<div class="${charNum} hpBarMax ${stateClass}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${hpBarFlex}</div>`;
-			handoutContent += `${name}${hpBarMax}<br>`;
+			hpContent += `${name}${hpBarMax}<br>`;
 		}
-		handoutContent += `</div>`;
-		let handout = getHandout();
-		handout.set('notes',handoutContent);
-	};
+		return hpContent;
+	}
+
+	function turnOutlineContent(chars){
+		return `<div class=""`;
+		//background-image:url(https://s3.amazonaws.com/files.d20.io/images/291777366/3YbIbemHbFxh1z9EC5J6zA/max.png);
+		//width:448px;
+		//height:249px;
+	}
 
 	function toPerCSS(num){
 		num = Math.abs(num);
@@ -202,23 +290,9 @@ const hpBarHandout = (function() {
 		return num;
 	};
 
-	function content(charHP){
-		let content;
-		content = `${charHP.hpNew}/${charHP.hpNewMax}`
-		return content;
-	};
-
-	function makeCharSection(){
-		
-	};
-
-	function makeBar(){
-
-	};
-
 	function getHandout() {
 		let handout = filterObjs(function(o){
-			return ('handout' === o.get('type') && scriptIndex.name === o.get('name') && false === o.get('archived'));
+			return ('handout' === o.get('type') && `${scriptIndex.name}` === o.get('name') && false === o.get('archived'));
 		})[0];
 		if(handout) {
 			return handout;
@@ -227,8 +301,8 @@ const hpBarHandout = (function() {
     };
 
 	function createHandout() {
-        let handout = createObj('handout',{name: scriptIndex.name});
-		handout.set('notes', '<h3>Log</h3>');
+        let handout = createObj('handout',{name: `${scriptIndex.name}`});
+		handout.set('notes', '');
         return handout;
 	};
 

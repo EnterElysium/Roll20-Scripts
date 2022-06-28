@@ -75,10 +75,10 @@ const hpBarHandout = (function() {
 				this._changedHP = true;
 				this._hpDeltaTrue = Char.sanitiseHP(charNew.get("current")) - Char.sanitiseHP(charOld["current"]);
 				//bound reset ignore
-				if(Char.sanitiseHP(charNew.get("current")) == 0 && Char.sanitiseHP(charOld["current"]) <= 0){
+				if(Char.sanitiseHP(charNew.get("current")) <= 0 && Char.sanitiseHP(charOld["current"]) <= 0){
 					this._changedHP = false;
 				}
-				else if(Char.sanitiseHP(charNew.get("current")) == Char.sanitiseHP(charNew.get("max")) && Char.sanitiseHP(charOld["current"]) >= Char.sanitiseHP(charNew.get("max"))){
+				else if(Char.sanitiseHP(charNew.get("current")) >= Char.sanitiseHP(charNew.get("max")) && Char.sanitiseHP(charOld["current"]) >= Char.sanitiseHP(charNew.get("max"))){
 					this._changedHP = false;
 				}
 				this._hpNewMax = Char.sanitiseHP(charNew.get("max"));

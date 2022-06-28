@@ -159,11 +159,10 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 
 .userscript-infoHandout .userscript-initOld{
-    animation: 2s fadeOut ease-in-out;
+    animation: 1.5s fadeOut ease-in-out;
 }
 @keyframes fadeOut {
     0% {opacity: 1;}
-    25% {opacity: 1;}
     100% {opacity: 0;}
 }
 

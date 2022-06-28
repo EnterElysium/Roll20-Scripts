@@ -1,4 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Slabo+27px&display=swap');
+/*---------------------*/
+/*------VARIABLES------*/
+/*---------------------*/
+/*CAST of 4 & 5 PLAYERS*/
+.userscript-infoHandout.userscript-cast4, .userscript-infoHandout.userscript-cast5{
+    /*BARS*/
+    /*bar size*/
+    --barwidth: 436px;
+    --barheight: 38px;
+    /*bar position*/
+    --barPosTopMain: 398px;
+    --barPosTopBottom: 898px;
+    --barPosLeftPC1: 512px;
+    --barPosLeftPC2: 962px;
+    --barPosLeftPC3: 1412px;
+    --barPosLeftPC4: 1412px;
+    /*INIT BORDERS*/
+    /*border size*/
+    --initBoxWidth: 448px;
+    --initBoxHeight: 249px;
+    /*border position*/
+    --initPosTopMain: 145px;
+    --initPosTopBottom: 545px;
+    --initPosLeftGM: 57px;
+    --initPosLeftPC1: 507px;
+    --initPosLeftPC2: 956px;
+    --initPosLeftPC3: 1406px;
+    --initPosLeftPC4: 1406px;
+    /*deathsaves*/
+}
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
@@ -17,18 +47,11 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     display:none;
 }
 
-.userscript-infoHandout.userscript-cast4, .userscript-infoHandout.userscript-cast5{
-    --barwidth: 436px;
-    --barheight: 38px;
-    --initBoxWidth: 448px;
-    --initBoxHeight: 249px;
-}
-
 .userscript-infoHandout *{
     visibility: visible;
 }
 
-.userscript-hpBarMax{
+.userscript-infoHandout .userscript-hpBarMax{
     width: var(--barwidth) !important;
     height: var(--barheight) !important;
     visibility: hidden;
@@ -41,6 +64,12 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 .userscript-hpBarFlex.userscript-dec, .userscript-hpBarFlex.userscript-inc{
     animation: 0.5s attention 2, 0.5s attention 2s 2;
 }
+@keyframes attention{
+    0%{box-shadow: 0px 0px 0px 0px gold;}
+    50%{box-shadow: 0px 0px 25px 5px gold; opacity:0.55;}
+    100%{box-shadow: 0px 0px 0px 0px gold;}
+}
+
 .userscript-hpBarPush.userscript-dec{
   animation: 3s hpDec ease-in-out;
 }
@@ -55,11 +84,7 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     0% {width:0px}
     100% {width: 440px}
 }
-@keyframes attention{
-    0%{box-shadow: 0px 0px 0px 0px gold;}
-    50%{box-shadow: 0px 0px 25px 5px gold; opacity:0.55;}
-    100%{box-shadow: 0px 0px 0px 0px gold;}
-}
+
 .userscript-dmgfloat{
     animation: 4.5s dmgfloatup 0.5s ease-out;
     font-family: 'Slabo 27px', serif !important;
@@ -82,44 +107,46 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 .userscript-dmgfloat.userscript-dec{
     color: darkred;
-    /*-webkit-text-stroke: 1px gold;*/
 }
 .userscript-dmgfloat.userscript-inc{
     color:green;
-    /*-webkit-text-stroke: 1px gold;*/
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player1, .userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player1{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player1, .userscript-infoHandout .userscript-hpBarMax.userscript-player1{
     position: fixed;
-    top: 398px;
-    left:512px;
+    top: var(--barPosTopMain);
+    left: var(--barPosLeftPC1);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player2, .userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player2{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player2, .userscript-infoHandout .userscript-hpBarMax.userscript-player2{
     position: fixed;
-    top: 398px;
-    left:962px;
+    top: var(--barPosTopMain);
+    left: var(--barPosLeftPC2);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player3, .userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player3{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player3, .userscript-infoHandout .userscript-hpBarMax.userscript-player3{
     position: fixed;
-    top: 398px;
-    left:1412px;
+    top: var(--barPosTopMain);
+    left: var(--barPosLeftPC3);
+}
+
+.userscript-infoHandout .userscript-hpBarMax.userscript-player4, .userscript-infoHandout .userscript-hpBarMax.userscript-player4{
+    position: fixed;
+    top: var(--barPosTopBottom);
+    left: var(--barPosLeftPC4);
 }
 
 .userscript-infoHandout .userscript-initBorder{
     background-image:url(https://s3.amazonaws.com/files.d20.io/images/291777366/3YbIbemHbFxh1z9EC5J6zA/max.png);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-initBorder{
-    /*size*/
+.userscript-infoHandout .userscript-initBorder{
     width: var(--initBoxWidth);
     height: var(--initBoxHeight);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-initNew{
-    /*intro animation*/
-    animation: 2s fadeIn ease-in-out, 0.5s yourTurn 1.5s 2;
+.userscript-infoHandout .userscript-initNew{
+    animation: 1.5s fadeIn ease-in-out, 0.5s yourTurn 1s 2;
 }
 @keyframes fadeIn {
     0% {opacity: 0;}
@@ -131,49 +158,170 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     100%{box-shadow: 0px 0px 0px 0px rgba(255, 215, 0, 0.30) inset  0px 0px 0px 0px rgba(255, 215, 0, 0.3);}
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-initOld{
-    /*outro animation*/
-    animation: 2.5s fadeOut ease-in-out;
+.userscript-infoHandout .userscript-initOld{
+    animation: 2s fadeOut ease-in-out;
 }
 @keyframes fadeOut {
     0% {opacity: 1;}
-    20% {opacity: 1;}
+    25% {opacity: 1;}
     100% {opacity: 0;}
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-player0{
+.userscript-infoHandout .userscript-initBorder.userscript-player0{
     position: fixed;
-    top: 145px;
-    left:57px;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftGM);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-player1{
+.userscript-infoHandout .userscript-initBorder.userscript-player1{
     position: fixed;
-    top: 145px;
-    left:507px;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC1);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-player2{
+.userscript-infoHandout .userscript-initBorder.userscript-player2{
     position: fixed;
-    top: 145px;
-    left:956px;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC2);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-player3{
+.userscript-infoHandout .userscript-initBorder.userscript-player3{
     position: fixed;
-    top: 145px;
-    left:1406px;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC3);
 }
 
-.userscript-infoHandout.userscript-cast4 .userscript-player4{
+.userscript-infoHandout .userscript-initBorder.userscript-player4{
     position: fixed;
-    /*top: 145px;
-    left:145px;*/
+    top: var(--initPosTopBottom);
+    left: var(--initPosLeftPC4);
 }
 
-/*
+/*deathsaves*/
+.userscript-infoHandout .userscript-deathsaves{
+    width: var(--barwidth) !important;
+    position:absolute;
+    left:0px;
+    top:-50px;
+}
 
-		//background-image:url(https://s3.amazonaws.com/files.d20.io/images/291777366/3YbIbemHbFxh1z9EC5J6zA/max.png);
+.userscript-infoHandout .userscript-deathsaves .userscript-successes>div{
+    background-image:url(https://s3.amazonaws.com/files.d20.io/images/291981531/D78s0Erbqe5qDWpaZGNzfg/max.png);
+    width: 30px;
+    height:30px;
+    background-size: 30px 30px;
+    margin-right:-21px;
+    position: relative;
+}
 
+.userscript-infoHandout .userscript-deathsaves .userscript-fails>div{
+    background-image:url(https://s3.amazonaws.com/files.d20.io/images/291981530/jIeTiRzpxopYO6THvoCIJg/max.png);
+    width: 40px;
+    height: 40px;
+    background-size: 40px 40px;
+    margin-left:-28px;
+    transform: rotate(18deg);
+    position: relative;
+    left:8px;
+}
 
-*/
+/*adjust individual plavement up and down*/
+.userscript-infoHandout .userscript-deathsaves .userscript-succ1{
+    top: 3px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-succ2{
+    top: 5px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-succ3{
+    top: 7px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fail1{
+    top: 0px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fail2{
+    top: 1px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fail3{
+    top: 2px;
+}
+
+/*animate in and out saves*/
+.userscript-infoHandout .userscript-deathsaves .userscript-successes .userscript-inc{
+    animation: .5s deathIn ease-in;
+}
+@keyframes deathIn {
+    0% {opacity: 0; transform: scale(1.5,1.5);}
+    100% {opacity: 1; transform: scale(1,1);}
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-successes .userscript-dec{
+    animation: 1s deathOut ease-out;
+}
+@keyframes deathOut {
+    0% {opacity: 1; transform: scale(1,1);}
+    100% {opacity: 0; transform: scale(1.5,1.5);}
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fails .userscript-inc{
+    animation: .5s deathInT ease-in;
+}
+@keyframes deathInT {
+    0% {opacity: 0; transform: scale(1.5,1.5) rotate(18deg);}
+    100% {opacity: 1; transform: scale(1,1) rotate(18deg);}
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fails .userscript-dec{
+    animation: 1s deathOutT ease-out;
+}
+@keyframes deathOutT {
+    0% {opacity: 1; transform: scale(1,1) rotate(18deg);}
+    100% {opacity: 0; transform: scale(1.5,1.5) rotate(18deg);}
+}
+
+.userscript-infoHandout .userscript-deathsaves .userscript-successes{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fails{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+/*death filter*/
+.userscript-infoHandout .userscript-deathfilter{
+    width: var(--initBoxWidth);
+    height: var(--initBoxHeight);
+    background-color: rgba(48, 0, 0,0.2);
+    box-shadow: inset  0px 0px 100px 8px rgba(48, 0, 0, .95)
+}
+
+.userscript-infoHandout .userscript-deathfilter.userscript-player1{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC1);
+}
+
+.userscript-infoHandout .userscript-deathfilter.userscript-player2{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC2);
+}
+
+.userscript-infoHandout .userscript-deathfilter.userscript-player3{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC3);
+}
+
+.userscript-infoHandout .userscript-deathfilter.userscript-player4{
+    position: fixed;
+    top: var(--initPosTopBottom);
+    left: var(--initPosLeftPC4);
+}
+
+.userscript-infoHandout .userscript-die{
+    animation: 2s fadeIn ease-out;
+}
+
+.userscript-infoHandout .userscript-undie{
+    animation: 2s fadeOut ease-in;
+}

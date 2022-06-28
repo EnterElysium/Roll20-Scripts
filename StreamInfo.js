@@ -270,6 +270,14 @@ const hpBarHandout = (function() {
 			rewriteHandout(handoutContent,handoutSuffix);
 		}
 
+		//change the death overlays
+		if(changed.what === "ds"){
+			handoutContent = ``;
+			handoutContent += deathFilter(changed);
+			let handoutSuffix = `Dead`;
+			handoutContent ? rewriteHandout(handoutContent,handoutSuffix) : false;
+		}
+
 		//change the main overlay handout
 		if(changed.what === "init"){
 			let handoutSuffix = `Init`
@@ -279,6 +287,28 @@ const hpBarHandout = (function() {
 			initCheck(changed.initHistory,handoutContent,handout);
 		}
 	};
+
+	function deathFilter(changed){
+		//set characters that are dead to dead
+		handoutContent = ``;
+		let i = 0;
+		let fire = false;
+		for (let char of changed.chars){
+			//death filter
+			if(char.dsNewFail === 3 && char.hasChanged === false){
+				handoutContent += `<div class="player${char.myRank} dead deathfilter"></div>`;
+			}
+			else if(char.dsNewFail === 3 && char.dsOldFail === 2 && char.hasChanged === true){
+				handoutContent += `<div class="player${char.myRank} die deathfilter"></div>`;
+				fire = true;
+			}
+			else if(char.dsNewFail === 2 && char.dsOldFail === 3 && char.hasChanged === true){
+				handoutContent += `<div class="player${char.myRank} undie deathfilter" style="opacity:0;"></div>`;
+				fire = true;
+			}
+		}
+		return fire ? handoutContent : ``;
+	}
 
 	function rewriteHandout(handoutContent,handoutSuffix,callback){
 		handoutContent = handoutWrap(`start`) + handoutContent + handoutWrap(`end`);
@@ -292,7 +322,7 @@ const hpBarHandout = (function() {
 		else{
 			handout.set('notes',handoutContent);
 		}
-	}
+	};
 
 	function initCheck(inits,handoutContNew,handout){
 		handout.get('notes', function(handoutContOld){
@@ -312,7 +342,7 @@ const hpBarHandout = (function() {
 			}
 		});
 		handout.set('notes',handoutContNew);
-	}
+	};
 
 	function turnorderOn(c){
 		let changed = createChange(c)
@@ -377,24 +407,26 @@ const hpBarHandout = (function() {
 		let name = `<p class="name player${char.myRank}" style="display:block">${char.name}</p>`;
 		let pushCSS = `height:100%;`;
 		let flexCSS = `height:100%; display:inline-block; background-color: rgb(200,0,0);`;
-		let stateClass = "";
-		let hpContent = ``;
+		let hpState = "";
+		let charContent = ``;
 		let dmgfloat = ``;
+
+		//HP BARS
 		//are we inc or dec (or none)?
 		if (char.changedHP && char.hpNew < char.hpOld) {
-			stateClass = "dec";
+			hpState = "dec";
 		}
 		else if (char.changedHP && char.hpNew > char.hpOld) {
-			stateClass = "inc";
+			hpState = "inc";
 		}
 		else {
-			stateClass = "none";
+			hpState = "none";
 		}
 		//dmg floaties
 		if (char.changedHP) {
 			dmgfloat = char.hpDeltaTrue < 0 ? `-` : `+`;
 			dmgfloat += Math.abs(char.hpDeltaTrue).toString();
-			dmgfloat = `<div class="player${char.myRank} dmgpos ${stateClass}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="player${char.myRank} dmgfloat ${stateClass}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDeltaTrue) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
+			dmgfloat = `<div class="player${char.myRank} dmgpos ${hpState}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="player${char.myRank} dmgfloat ${hpState}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDeltaTrue) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
 		}
 		//if HP has decreaesed
 		if (char.changedHP && char.hpNew < char.hpOld) {
@@ -409,12 +441,57 @@ const hpBarHandout = (function() {
 			pushCSS += ` display:none;`;
 			flexCSS += ` width: ${toPerCSS(char.hpNewPercent)};`;
 		}
-		let hpBarPush = `<div class="player${char.myRank} hpBarPush ${stateClass}" style="${pushCSS}"></div>`;
-		let hpBarFlex = `<div class="player${char.myRank} hpBarFlex ${stateClass}" style="${flexCSS}">${hpBarPush}</div>`;
-		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${stateClass}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${hpBarFlex}</div>`;
-		hpContent += `${name}${hpBarMax}<br>`;
+		let hpBarPush = `<div class="player${char.myRank} hpBarPush ${hpState}" style="${pushCSS}"></div>`;
+		let hpBarFlex = `<div class="player${char.myRank} hpBarFlex ${hpState}" style="${flexCSS}">${hpBarPush}</div>`;
 
-		return hpContent;
+		//create the deathsaves
+		let dsArea = dsConstructor(char);
+
+		//make the full hpbar container
+		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${hpBarFlex}${dsArea}</div>`;
+		charContent += `${name}${hpBarMax}<br>`;
+
+		return charContent;
+	}
+
+	function dsConstructor(char){
+		//DS AREA
+		if(char.changedDS || char.changedHP){
+			let dss = ``;
+			let dssDec = false;
+			for (let i = 1;i<=char.dsNewSucc;i++){
+				let dsState = ``;
+				char.dsNewSucc > char.dsOldSucc ? dsState = `inc` : false;
+				char.dsNewSucc < char.dsOldSucc ? (dsState = `none`,dssDec = true) : false;
+				char.dsNewSucc === char.dsOldSucc || i != char.dsNewSucc ? dsState = `none` : false;
+				dss += `<div class="player${char.myRank} succ${i} ${dsState}" style="display: inline-block;"></div>`
+			}
+			if(dssDec === true || (char.dsNewSucc === 0 && char.dsOldSucc === 1)){
+				dss += `<div class="player${char.myRank} succ${char.dsOldSucc} dec" style="display: inline-block; opacity:0;"></div>`;
+			}
+						
+			let dsf = ``;
+			let dsfDec = false;
+			for (let i = 1;i<=char.dsNewFail;i++){
+				let dsState = ``;
+				char.dsNewFail > char.dsOldFail ? dsState = `inc` : false;
+				char.dsNewFail < char.dsOldFail ? (dsState = `none`,dsfDec = true) : false;
+				char.dsNewFail === char.dsOldFail || i != char.dsNewFail ? dsState = `none` : false;
+				dsf += `<div class="player${char.myRank} fail${i} ${dsState}" style="display: inline-block;"></div>`
+			}
+			if(dsfDec === true || (char.dsNewFail === 0 && char.dsOldFail === 1)){
+				dsf += `<div class="player${char.myRank} fail${char.dsOldFail} dec" style="display: inline-block; opacity:0;"></div>`;
+			}
+			
+			let dsLeft = `<div class="player${char.myRank} successes" style="display: inline-block; width:50%; text-align: left;">${dss}</div>`;
+			let dsRight = `<div class="player${char.myRank} fails" style="direction: rtl; display: inline-block; width:50%; text-align: right;">${dsf}</div>`;
+			let dsArea = `<div class="player${char.myRank} deathsaves" style="width:500px; white-space:nowrap;">${dsLeft}${dsRight}</div>`;
+			
+			return `${dsArea}`;
+		}
+		else{
+			return ``;
+		}
 	}
 
 	function toPerCSS(num){

@@ -11,6 +11,7 @@
     /*bar position*/
     --barPosTopMain: 398px;
     --barPosTopBottom: 898px;
+    --barPosLeftGM: 64px;
     --barPosLeftPC1: 512px;
     --barPosLeftPC2: 962px;
     --barPosLeftPC3: 1412px;
@@ -22,7 +23,7 @@
     /*border position*/
     --initPosTopMain: 145px;
     --initPosTopBottom: 545px;
-    --initPosLeftGM: 57px;
+    --initPosLeftGM: 56px;
     --initPosLeftPC1: 507px;
     --initPosLeftPC2: 956px;
     --initPosLeftPC3: 1406px;
@@ -48,8 +49,8 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     visibility: visible;
 }
 
-.userscript-infoHandout.userscript-name{
-    display:none;
+.userscript-infoHandout>.userscript-name{
+    display:none !important;
 }
 
 .userscript-infoHandout *{
@@ -115,6 +116,12 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 .userscript-dmgfloat.userscript-inc{
     color:green;
+}
+
+.userscript-infoHandout .userscript-hpBarMax.userscript-player0, .userscript-infoHandout .userscript-hpBarMax.userscript-player0{
+    position: fixed;
+    top: var(--barPosTopMain);
+    left: var(--barPosLeftGM);
 }
 
 .userscript-infoHandout .userscript-hpBarMax.userscript-player1, .userscript-infoHandout .userscript-hpBarMax.userscript-player1{
@@ -442,6 +449,12 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-infoHandout .userscript-undie{
     animation: 2s fadeOut ease-in;
+}
+
+.userscript-infoHandout .userscript-deathfilter.userscript-player0{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC1);
 }
 
 .userscript-infoHandout .userscript-deathfilter.userscript-player1{

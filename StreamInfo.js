@@ -1,4 +1,4 @@
-const hpBarHandout = (function() {	
+const StreamInfo = (function() {	
 	/*
 	High
 
@@ -10,19 +10,19 @@ const hpBarHandout = (function() {
 	Max hp dec doesn't call anything - bar stays incorrect
 	*/
 
-	const scriptIndex = {"name":"StreamInfo","version":"v0.01",};
+	const scriptIndex = {"name":"StreamInfo","version":"v0.01","apiHP":apiHP,"apiIDs":apiIDs,};
 
 	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
-	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-MTq8lHfzjgUC_8GLekj","-M7raV5XUzZQgU9bPw7A"];
+	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
 	// playersStored = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
-	const testplayer = ["-MTq8lHfzjgUC_8GLekj"];
-	const gmID = ["-M7raV5XUzZQgU9bPw7A"];
+	// const testplayer = ["-MTq8lHfzjgUC_8GLekj"];
+	// const gmID = ["-M7raV5XUzZQgU9bPw7A"];
 
 	class Changed{
 		constructor(obj=false, prev=false, msg=false){
 			this._chars = [];
 			this._what = false;
-			if(obj && obj.get("turnorder")){
+			if(obj && typeof obj.get === "function" && obj.get("turnorder")){
 				this._what = "init";
 				this._initHistory = [0,0];
 				//get whose turn it is
@@ -81,93 +81,143 @@ const hpBarHandout = (function() {
 	}
 
 	class Char{
-		constructor(id,charNew=false,charOld=false,msg=false){
-			this._id = id;
-			this._pid = playerIDs[ids.indexOf(id)];
-			this._rank = [ids.indexOf(id)+1,ids.length];
-			this._name = getObj('character', id).get("name");
-			//hp construction
-			if (charNew && charNew.get("name") === "hp" && id == charNew.get("characterid")){
-				this._changedHP = true;
-				this._hpDeltaTrue = Char.sanitiseHP(charNew.get("current")) - Char.sanitiseHP(charOld["current"]);
-				//bound reset ignore
-				if(Char.sanitiseHP(charNew.get("current")) <= 0 && Char.sanitiseHP(charOld["current"]) <= 0){
-					this._changedHP = false;
-				}
-				else if(Char.sanitiseHP(charNew.get("current")) >= Char.sanitiseHP(charNew.get("max")) && Char.sanitiseHP(charOld["current"]) >= Char.sanitiseHP(charNew.get("max"))){
-					this._changedHP = false;
-				}
-				this._hpNewMax = Char.sanitiseHP(charNew.get("max"));
-				this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.get("current")),this.hpNewMax);
-				this._hpOldMax = Char.sanitiseHP(charOld["max"]);
-				this._hpOld = Char.capBounds(Char.sanitiseHP(charOld["current"]),this.hpOldMax);
-			}
-			else{
+		constructor(id=false,charNew=false,charOld=false,msg=false){
+			if(playerIsGM(msg.playerid)){
+				this._id = "gm";
+				this._pid = "gm";
+				this._rank = [0,ids.length];
+				this._name = "GM";
+				//hp construction
 				this._changedHP = false;
 				this._hpDeltaTrue = 0;
-				let attrHP = findObjs({
-					_characterid: id,
-					_type: "attribute",
-					name: "hp"
-				})[0];
-				this._hpNewMax = Char.sanitiseHP(attrHP.get("max"));
-				this._hpNew = Char.capBounds(Char.sanitiseHP(attrHP.get("current")),this.hpNewMax);
-				this._hpOldMax = this.hpNewMax;
-				this._hpOld = this.hpNew;
-			}
-			//deathsave construction
-			this._changedDS = false;
-			this._dsNewSucc = 0;
-			this._dsNewFail = 0;
-			this._dsOldSucc = 0;
-			this._dsOldFail = 0;
-			for(let i = 1;i<=3;i++){
-				//successes
-				let dss = findObjs({
-					_characterid: id,
-					_type:"attribute",
-					name:`deathsave_succ${i}`
-				})[0]
-				if(charNew && id == charNew.get("characterid") && charNew.get("name") === `deathsave_succ${i}`){
-					dss = [charNew.get(`current`),charOld[`current`]];
-					this._dsNewSucc += dss[0] === "on" ? 1 : 0;
-					this._dsOldSucc += dss[1] === "on" ? 1 : 0;
-					this._changedDS = true;
-				}
-				else{
-					dss = dss.get("current")
-					this._dsNewSucc += dss === "on" ? 1 : 0;
-					this._dsOldSucc += dss === "on" ? 1 : 0;
-				}
-				//fails
-				let dsf = findObjs({
-					_characterid: id,
-					_type:"attribute",
-					name:`deathsave_fail${i}`
-				})[0]
-				if(charNew && id == charNew.get("characterid") && charNew.get("name") === `deathsave_fail${i}`){
-					dsf = [charNew.get(`current`),charOld[`current`]];
-					this._dsNewFail += dsf[0] === "on" ? 1 : 0;
-					this._dsOldFail += dsf[1] === "on" ? 1 : 0;
-					this._changedDS = true;
-				}
-				else{
-					dsf = dsf.get("current")
-					this._dsNewFail += dsf === "on" ? 1 : 0;
-					this._dsOldFail += dsf === "on" ? 1 : 0;
-				}
-			}
-			//dice construction
-			this._changedDice = false;
-			this._dice = [];
-			if (msg && (Char.extractChar(msg) == this.id || msg.playerid == this.pid )){ //this currently only gets rolls with the character name in them, need to sort non-sheet rolls
-				let d = Char.extractDice(msg);
-				if(d && Array.isArray(d) && d.length > 0){
-					this._dice = d;
-					if(msg.type == "whisper"){
-						this.obfuscateDice();
+				this._hpNewMax = 1;
+				this._hpNew = 1;
+				this._hpOldMax = 1;
+				this._hpOld = 1;
+				//deathsave construction
+				this._changedDS = false;
+				this._dsNewSucc = 0;
+				this._dsNewFail = 0;
+				this._dsOldSucc = 0;
+				this._dsOldFail = 0;
+				//dice construction
+				this._changedDice = false;
+				this._dice = [];
+				if (msg && msg.inlinerolls && (msg.playerid == this.pid || playerIsGM(msg.playerid))){
+					let d = Char.extractDice(msg);
+					if(d && Array.isArray(d) && d.length > 0){
+						this._dice = d;
+						if(msg.type == "whisper"){
+							this.obfuscateDice();
+						}
+						this._changedDice = true;
 					}
-					this._changedDice = true;
+				}
+			}
+			else{
+				this._id = id;
+				this._pid = playerIDs[ids.indexOf(id)];
+				this._rank = [ids.indexOf(id)+1,ids.length];
+				this._name = getObj('character', id).get("name");
+				//hp construction
+				if (charNew && typeof charNew.get === "function" && charNew.get("name") === "hp" && id == charNew.get("characterid")){
+					this._changedHP = true;
+					this._hpDeltaTrue = Char.sanitiseHP(charNew.get("current")) - Math.max(Char.sanitiseHP(charOld["current"]),0);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNew.get("current")) <= 0 && Char.sanitiseHP(charOld["current"]) <= 0){
+						this._changedHP = false;
+					}
+					else if(Char.sanitiseHP(charNew.get("current")) >= Char.sanitiseHP(charNew.get("max")) && Char.sanitiseHP(charOld["current"]) >= Char.sanitiseHP(charNew.get("max"))){
+						this._changedHP = false;
+					}
+					this._hpNewMax = Char.sanitiseHP(charNew.get("max"));
+					this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.get("current")),this.hpNewMax);
+					this._hpOldMax = Char.sanitiseHP(charOld["max"]);
+					this._hpOld = Char.capBounds(Char.sanitiseHP(charOld["current"]),this.hpOldMax);
+				}
+				else if(charNew && typeof charNew.get === "undefined" && charNew.name === "hp" && charNew._characterid === id){
+					logger(`firing a pass from healBot`);
+					this._changedHP = true;
+					this._hpDeltaTrue = Char.sanitiseHP(charNew.current) - Char.sanitiseHP(charOld.current);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNew.current) <= 0 && Char.sanitiseHP(charOld.current) <= 0){
+						this._changedHP = false;
+					}
+					else if(Char.sanitiseHP(charNew.current) >= Char.sanitiseHP(charNew.max) && Char.sanitiseHP(charOld.current) >= Char.sanitiseHP(charNew.max)){
+						this._changedHP = false;
+					}
+					this._hpNewMax = Char.sanitiseHP(charNew.max);
+					this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.current),this.hpNewMax);
+					this._hpOldMax = Char.sanitiseHP(charOld.max);
+					this._hpOld = Char.capBounds(Char.sanitiseHP(charOld.current),this.hpOldMax);
+				}
+				else{
+					this._changedHP = false;
+					this._hpDeltaTrue = 0;
+					let attrHP = findObjs({
+						_characterid: id,
+						_type: "attribute",
+						name: "hp"
+					})[0];
+					this._hpNewMax = Char.sanitiseHP(attrHP.get("max"));
+					this._hpNew = Char.capBounds(Char.sanitiseHP(attrHP.get("current")),this.hpNewMax);
+					this._hpOldMax = this.hpNewMax;
+					this._hpOld = this.hpNew;
+				}
+				//deathsave construction
+				this._changedDS = false;
+				this._dsNewSucc = 0;
+				this._dsNewFail = 0;
+				this._dsOldSucc = 0;
+				this._dsOldFail = 0;
+				for(let i = 1;i<=3;i++){
+					//successes
+					let dss = findObjs({
+						_characterid: id,
+						_type:"attribute",
+						name:`deathsave_succ${i}`
+					})[0]
+					if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_succ${i}`){
+						dss = [charNew.get(`current`),charOld[`current`]];
+						this._dsNewSucc += dss[0] === "on" ? 1 : 0;
+						this._dsOldSucc += dss[1] === "on" ? 1 : 0;
+						this._changedDS = true;
+					}
+					else{
+						dss = dss.get("current")
+						this._dsNewSucc += dss === "on" ? 1 : 0;
+						this._dsOldSucc += dss === "on" ? 1 : 0;
+					}
+					//fails
+					let dsf = findObjs({
+						_characterid: id,
+						_type:"attribute",
+						name:`deathsave_fail${i}`
+					})[0]
+					if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_fail${i}`){
+						dsf = [charNew.get(`current`),charOld[`current`]];
+						this._dsNewFail += dsf[0] === "on" ? 1 : 0;
+						this._dsOldFail += dsf[1] === "on" ? 1 : 0;
+						this._changedDS = true;
+					}
+					else{
+						dsf = dsf.get("current")
+						this._dsNewFail += dsf === "on" ? 1 : 0;
+						this._dsOldFail += dsf === "on" ? 1 : 0;
+					}
+				}
+				//dice construction
+				this._changedDice = false;
+				this._dice = [];
+				if (msg && (Char.extractChar(msg) == this.id || msg.playerid == this.pid )){ //this currently only gets rolls with the character name in them, need to sort non-sheet rolls
+					let d = Char.extractDice(msg);
+					if(d && Array.isArray(d) && d.length > 0){
+						this._dice = d;
+						if(msg.type == "whisper"){
+							this.obfuscateDice();
+						}
+						this._changedDice = true;
+					}
 				}
 			}
 		}
@@ -516,7 +566,7 @@ const hpBarHandout = (function() {
 			hpState = "none";
 		}
 		//dmg floaties
-		if (char.changedHP) {
+		if (char.changedHP && Math.abs(char.hpDeltaTrue) > 0) {
 			dmgfloat = char.hpDeltaTrue < 0 ? `-` : `+`;
 			dmgfloat += Math.abs(char.hpDeltaTrue).toString();
 			dmgfloat = `<div class="player${char.myRank} dmgpos ${hpState}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="player${char.myRank} dmgfloat ${hpState}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDeltaTrue) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
@@ -720,6 +770,14 @@ const hpBarHandout = (function() {
         options == "noarchive" ? options = {noarchive:true} : false ;
         sendChat(spkAs,msgContents,null,options);
     };
+
+	function apiHP(obj,prev){
+		parseChanges(createChange(obj, prev));
+	};
+
+	function apiIDs(){
+		return ids;
+	};
 
 	return scriptIndex;
 })();

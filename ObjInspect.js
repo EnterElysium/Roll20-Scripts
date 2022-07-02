@@ -17,6 +17,7 @@ const ObjInspector = (function() {
                 case "test2":
                     repCharTest(...args.slice(2));
                     break;
+                case "inpj": log(getObj('character', args[2]).get("inplayerjournals")); return;
                 default:
                     misc(...args.slice(1));
                     break;

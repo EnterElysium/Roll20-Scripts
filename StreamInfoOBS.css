@@ -28,6 +28,11 @@
     --initPosLeftPC3: 1406px;
     --initPosLeftPC4: 1406px;
     /*deathsaves*/
+    /*dice floats*/
+    --slow: 1.0;
+    --med: 0.7;
+    --fast: 0.5;
+    --veryfast: 0.4;
 }
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
@@ -285,12 +290,158 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     right: 0px;
 }
 
+/*dice floaties*/
+.userscript-infoHandout .userscript-dicearea{
+    width: var(--barwidth);
+}
+
+.userscript-infoHandout .userscript-diceareaorigin{
+    position:absolute;
+    left: calc(var(--initBoxWidth) - 80px);
+    bottom: calc(var(--initBoxHeight) - 40px);
+}
+
+.userscript-infoHandout .userscript-diceareaorigin.userscript-small{
+    --dicepoolMulti: var(--slow);
+}
+.userscript-infoHandout .userscript-diceareaorigin.userscript-med{
+    --dicepoolMulti: var(--med);
+}
+.userscript-infoHandout .userscript-diceareaorigin.userscript-large{
+    --dicepoolMulti: var(--fast);
+}
+.userscript-infoHandout .userscript-diceareaorigin.userscript-vlarge{
+    --dicepoolMulti: var(--veryfast);
+}
+
+.userscript-infoHandout .userscript-diceareaorigin .userscript-dice{
+    width: 80px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Slabo 27px', serif !important;
+    font-size: 1.5em;
+    color: #ffe070;
+    text-shadow: 3px 0px 5px #f17161b3, 0px 3px 5px #f17161b3, -3px 0px 5px #f17161b3, 0px -3px 5px #f17161b3;
+    animation: dicefade cubic-bezier(0, 0.5, 0.5, 0.5), dicescale cubic-bezier( 0, 0.5, 0.75, 0.5 ), dicemove linear;
+    animation-duration: calc(1s + 4s * var(--dicepoolMulti));
+}
+@keyframes dicefade {
+    0%{
+        opacity: 0;
+    }
+    5%{
+        opacity: 1;
+    }
+    50%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0;
+    }
+}
+@keyframes dicescale {
+    0%{
+        transform: scale(0.3);
+    }
+    5%{
+        transform: scale(1.2);
+    }
+    7%{
+        transform: scale(1);
+    }
+    100%{
+        transform: scale(0.35);
+    }
+}
+@keyframes dicemove {
+    0%{
+        bottom: 0px;
+    }
+    100%{
+        bottom: 80px;
+    }
+}
+.userscript-infoHandout .userscript-dice.userscript-dice1{
+    animation-delay: calc(1s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice2{
+    animation-delay: calc(2s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice3{
+    animation-delay: calc(3s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice4{
+    animation-delay: calc(4s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice5{
+    animation-delay: calc(5s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice6{
+    animation-delay: calc(6s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice7{
+    animation-delay: calc(7s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice8{
+    animation-delay: calc(8s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice9{
+    animation-delay: calc(9s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice10{
+    animation-delay: calc(10s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice11{
+    animation-delay: calc(11s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice12{
+    animation-delay: calc(12s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice13{
+    animation-delay: calc(13s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice14{
+    animation-delay: calc(14s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice15{
+    animation-delay: calc(15s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice16{
+    animation-delay: calc(16s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice17{
+    animation-delay: calc(17s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice18{
+    animation-delay: calc(18s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice19{
+    animation-delay: calc(19s * var(--dicepoolMulti));
+}
+.userscript-infoHandout .userscript-dice.userscript-dice20{
+    animation-delay: calc(20s * var(--dicepoolMulti));
+}
+
+
+
 /*death filter*/
+/*only dead*/
 .userscript-infoHandout .userscript-deathfilter{
     width: var(--initBoxWidth);
     height: var(--initBoxHeight);
     background-color: rgba(48, 0, 0,0.2);
     box-shadow: inset  0px 0px 100px 8px rgba(48, 0, 0, .95)
+}
+
+.userscript-infoHandout .userscript-die{
+    animation: 2s fadeIn ease-out;
+}
+
+.userscript-infoHandout .userscript-undie{
+    animation: 2s fadeOut ease-in;
 }
 
 .userscript-infoHandout .userscript-deathfilter.userscript-player1{
@@ -315,12 +466,4 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC4);
-}
-
-.userscript-infoHandout .userscript-die{
-    animation: 2s fadeIn ease-out;
-}
-
-.userscript-infoHandout .userscript-undie{
-    animation: 2s fadeOut ease-in;
 }

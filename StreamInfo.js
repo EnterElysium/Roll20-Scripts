@@ -1,11 +1,25 @@
 const hpBarHandout = (function() {	
+	/*
+	High
+
+	Medium
+	healBot healing doesn't cause bar to change (no api causing api) need to make actual call
+
+	Low
+	Max hp inc causes a 0hp floaty
+	Max hp dec doesn't call anything - bar stays incorrect
+	*/
 
 	const scriptIndex = {"name":"StreamInfo","version":"v0.01",};
 
 	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
+	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-MTq8lHfzjgUC_8GLekj","-M7raV5XUzZQgU9bPw7A"];
+	// playersStored = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
+	const testplayer = ["-MTq8lHfzjgUC_8GLekj"];
+	const gmID = ["-M7raV5XUzZQgU9bPw7A"];
 
 	class Changed{
-		constructor(obj, prev){
+		constructor(obj=false, prev=false, msg=false){
 			this._chars = [];
 			this._what = false;
 			if(obj && obj.get("turnorder")){
@@ -34,11 +48,12 @@ const hpBarHandout = (function() {
 			}
 			else{
 				for (let id of ids) {
-					let char = new Char(id, obj, prev);
+					let char = new Char(id, obj, prev, msg);
 					if(char.hasChanged){
 						this._who = id;
 						char.changedHP ? this._what = "hp" : false;
 						char.changedDS ? this._what = "ds" : false;
+						char.changedDice ? this._what = "dice" : false;
 						//char.changedInit ? this._what = "init" : false;
 					}
 					this._chars.push(char);
@@ -66,8 +81,9 @@ const hpBarHandout = (function() {
 	}
 
 	class Char{
-		constructor(id,charNew,charOld){
+		constructor(id,charNew=false,charOld=false,msg=false){
 			this._id = id;
+			this._pid = playerIDs[ids.indexOf(id)];
 			this._rank = [ids.indexOf(id)+1,ids.length];
 			this._name = getObj('character', id).get("name");
 			//hp construction
@@ -141,10 +157,25 @@ const hpBarHandout = (function() {
 					this._dsOldFail += dsf === "on" ? 1 : 0;
 				}
 			}
-			log(`${this._name}: DSNewSvF=${this._dsNewSucc}v${this._dsNewFail}  DSNewSvF=${this._dsOldSucc}v${this._dsOldFail}`);
+			//dice construction
+			this._changedDice = false;
+			this._dice = [];
+			if (msg && (Char.extractChar(msg) == this.id || msg.playerid == this.pid )){ //this currently only gets rolls with the character name in them, need to sort non-sheet rolls
+				let d = Char.extractDice(msg);
+				if(d && Array.isArray(d) && d.length > 0){
+					this._dice = d;
+					if(msg.type == "whisper"){
+						this.obfuscateDice();
+					}
+					this._changedDice = true;
+				}
+			}
 		}
 		get id() {
 			return this._id;
+		}
+		get pid() {
+			return this._pid;
 		}
 		get rank() {
 			return this._rank;
@@ -203,11 +234,27 @@ const hpBarHandout = (function() {
 		get changedInit() {
 			return this._changedInit;
 		}
+		get dice() {
+			return this._dice;
+		}
+		get changedDice() {
+			return this._changedDice;
+		}
 		get hasChanged() {
-			if(this.changedHP || this.changedDS || this.changedInit){
+			if(this.changedHP || this.changedDS || this.changedInit || this.changedDice){
 				return true;
 			}
 			return false;
+		}
+		obfuscateDice(){
+			let diceObfuscated = [];
+			let max = Math.ceil(this.dice.length*1.3);
+			let min = Math.ceil(this.dice.length/3);
+			let lenObfuscated = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+			for(let d = 1;d<=lenObfuscated;d++){
+				diceObfuscated.push("?");
+			};
+			this._dice = diceObfuscated;
 		}
 		static capBounds(num,max){
 			num < 0 ? num = 0 : false ;
@@ -219,7 +266,57 @@ const hpBarHandout = (function() {
 			Number.isNaN(hp) ? hp = 0 : false;
 			return hp;
 		}
+		static extractDice(msg){
+			if(msg.inlinerolls){
+				let rollData = libInline.getRollData(msg.inlinerolls);
+				let diceList = [];
+				for (let d of rollData){
+					if(d.dice){
+						let i = d.getDice("included");
+						diceList.push(i);
+					}
+				}
+				diceList = _.flatten(diceList);
+				return diceList;
+			};
+			return false;
+		};
+		//get character id from msg
+		static extractChar(msg,returnType){
+			if(!msg || !msg.content){
+				return false;
+			}
+			let msgDupe = _.clone(msg);
+			let charName;
+			msgDupe.content.replace(/charname=(.+?)$/,(match,charname)=>{
+				charName = charname;
+			});
+			if(!charName){
+				return false;
+			}
+			charName = charName.replace("}}","");
+			let character = findObjs({
+				type: "character",
+				name: charName,
+			})[0];
+			if(character){
+				switch(returnType){
+					case "character": return character;
+					case "name": return character.get("name");
+					case "id": return character.id;
+					default: return character.id;
+				};
+			};
+			return false;
+		};
 	};
+
+    on('chat:message', function(msg) {
+		if(msg && msg.inlinerolls){
+			parseChanges(createChange(false, false, msg));
+			return;
+		}
+    });
 
 	on("change:attribute", function(obj, prev) {
 		if(!obj || !prev){
@@ -243,13 +340,6 @@ const hpBarHandout = (function() {
 			parseChanges(createChange(obj, prev));
 			return;
 		}
-		// if(!obj || !prev){
-		// 	return;
-		// }
-		// if(){
-		// 	updateHandout(obj, prev);
-		// 	return;
-		// }
 	});
 
 	//turning on or off the tracker make sure the border fade nicely
@@ -257,14 +347,17 @@ const hpBarHandout = (function() {
 		c.get('initiativepage') ? turnorderOn(c) : turnorderOff();
 	});
 
-	function createChange(obj=false, prev=false){
-		return new Changed(obj,prev);
+	function createChange(obj=false, prev=false, msg=false){
+		return new Changed(obj,prev,msg);
 	}
 
 	function parseChanges(changed){
 		//change the Character handouts
-		if(changed.what === "hp" || changed.what === "ds"){
+		if(changed.what === "hp" || changed.what === "ds" || changed.what === "dice" ){
 			let charChanged = changed.chars.find(char => char.hasChanged === true); 
+			if(!charChanged){
+				return;
+			}
 			let handoutSuffix = `PC${charChanged.myRank}`;
 			let handoutContent = charContent(charChanged);
 			rewriteHandout(handoutContent,handoutSuffix);
@@ -302,7 +395,7 @@ const hpBarHandout = (function() {
 				handoutContent += `<div class="player${char.myRank} die deathfilter"></div>`;
 				fire = true;
 			}
-			else if(char.dsNewFail === 2 && char.dsOldFail === 3 && char.hasChanged === true){
+			else if(char.dsNewFail < char.dsOldFail && char.hasChanged === true){
 				handoutContent += `<div class="player${char.myRank} undie deathfilter" style="opacity:0;"></div>`;
 				fire = true;
 			}
@@ -446,11 +539,11 @@ const hpBarHandout = (function() {
 
 		//create the deathsaves
 		let dsArea = dsConstructor(char);
+		let diceArea = diceConstructor(char);
 
 		//make the full hpbar container
-		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${hpBarFlex}${dsArea}</div>`;
+		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${diceArea}${hpBarFlex}${dsArea}</div>`;
 		charContent += `${name}${hpBarMax}<br>`;
-
 		return charContent;
 	}
 
@@ -492,7 +585,39 @@ const hpBarHandout = (function() {
 		else{
 			return ``;
 		}
-	}
+	};
+
+	function diceConstructor(char){
+		//DS AREA
+		if(char.changedDice && char.dice && Array.isArray(char.dice) && char.dice.length > 0){
+			let diceList = char.dice;
+			let dice = ``;
+			let index = 0;
+			let fontsize = 60/Math.pow((char.dice.length+2),1)+20;
+			let dicepool;
+			if(char.dice.length <= 2){dicepool = `small`}
+			else if(char.dice.length <= 5){dicepool = `med`}
+			else if(char.dice.length <= 8){dicepool = `large`}
+			else{dicepool = `vlarge`};
+			for (let d of char.dice){
+				if(d){
+					index++;
+					let max = 15;
+					let min = -15;
+					let offsetTop = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+					let offsetLeft = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+					let dicenum = `<div class="player${char.myRank} dice dice${index}" style="opacity: 0;">${d}</div>`;
+					dice += `<div class="player${char.myRank} dicenumorigin dice${index}" style="text-align: center; position: absolute; top: ${Math.floor(offsetTop/2)}px; left: ${offsetLeft}px">${dicenum}</div>`;
+				}
+			}			
+			let diceOrigin = `<div class="player${char.myRank} diceareaorigin ${dicepool}" style="font-size: ${fontsize}px; position: absolute;">${dice}</div>`;
+			let diceArea = `<div class="player${char.myRank} dicearea" style="width:500px; white-space:nowrap;">${diceOrigin}</div>`;
+			return `${diceArea}`;
+		}
+		else{
+			return ``;
+		}
+	};
 
 	function toPerCSS(num){
 		num = Math.abs(num);
@@ -543,7 +668,7 @@ const hpBarHandout = (function() {
 		useLog === true ? logger(errorMsg) : false;
 		useChat === true ? chatter(errorMsg,"w",who,"noarchive") : false;
 		return;
-	}
+	};
 
 	//log stuff
     function logger(logtext){

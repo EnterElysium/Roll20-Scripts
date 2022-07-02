@@ -333,7 +333,11 @@ NPC mass request PC  (GM only)
 			this._cp = WalletPC.sanitiseCoin(charID,"cp");
 			this._isChar = true;
 			this._charID = charID;
-			this._charName = getObj('character', charID).get("name");
+			let charObj = getObj('character', charID);
+			if(!charObj){
+				errorHandler(null,"no character found",true,false);
+			}
+			this._charName = charObj.get("name");
 		}
 		get charID(){
 			return this._charID;
@@ -378,6 +382,7 @@ NPC mass request PC  (GM only)
 			})[0];
 			let coinValue;
 			if(!coinObj){
+				logger(`no ${coin} coin found for ${charID}, creating it`);
 				createObj("attribute", {
 					name: coin,
 					current: 0,

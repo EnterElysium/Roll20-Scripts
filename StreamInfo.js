@@ -94,6 +94,8 @@ const StreamInfo = (function() {
 				this._hpNew = 1;
 				this._hpOldMax = 1;
 				this._hpOld = 1;
+				/*default to conscious*/
+				this._ko = Char.koState(this.hpNew,this.hpOld);
 				//deathsave construction
 				this._changedDS = false;
 				this._dsNewSucc = 0;
@@ -103,7 +105,7 @@ const StreamInfo = (function() {
 				//dice construction
 				this._changedDice = false;
 				this._dice = [];
-				if (msg && msg.inlinerolls && (msg.playerid == this.pid || playerIsGM(msg.playerid))){
+				if (msg && (msg.inlinerolls || msg.type === "rollresult") && (msg.playerid == this.pid || playerIsGM(msg.playerid))){
 					let d = Char.extractDice(msg);
 					if(d && Array.isArray(d) && d.length > 0){
 						this._dice = d;
@@ -164,6 +166,8 @@ const StreamInfo = (function() {
 					this._hpOldMax = this.hpNewMax;
 					this._hpOld = this.hpNew;
 				}
+				/*Unconsciousness*/
+				this._ko = Char.koState(this.hpNew,this.hpOld);
 				//deathsave construction
 				this._changedDS = false;
 				this._dsNewSucc = 0;
@@ -266,6 +270,9 @@ const StreamInfo = (function() {
 		get hpOldPercent(){
 			return 100*this.hpOld/this.hpOldMax;
 		}
+		get ko(){
+			return this._ko;
+		}
 		get changedDS() {
 			return this._changedDS;
 		}
@@ -328,6 +335,16 @@ const StreamInfo = (function() {
 				}
 				diceList = _.flatten(diceList);
 				return diceList;
+			}
+			else if(msg.type === "rollresult"){
+				let rollData = JSON.parse(msg.content).rolls[0].results;
+				let diceList = [];
+				for (let d of rollData){
+					if(!d.d){
+						diceList.push(d.v);
+					}
+				}
+				return diceList;
 			};
 			return false;
 		};
@@ -359,10 +376,24 @@ const StreamInfo = (function() {
 			};
 			return false;
 		};
+		static koState(hpNew=1,hpOld=1){
+			if(hpNew <= 0 && hpOld > 0){
+				return "godown";
+			}
+			else if(hpNew > 0 && hpOld <= 0){
+				return "getup";
+			}
+			else if(hpNew <= 0){
+				return "unconscious";
+			}
+			else{
+				return "conscious";
+			};
+		}
 	};
 
     on('chat:message', function(msg) {
-		if(msg && msg.inlinerolls){
+		if(msg && (msg.inlinerolls || msg.type === "rollresult")){
 			parseChanges(createChange(false, false, msg));
 			return;
 		}
@@ -411,6 +442,12 @@ const StreamInfo = (function() {
 			let handoutSuffix = `PC${charChanged.myRank}`;
 			let handoutContent = charContent(charChanged);
 			rewriteHandout(handoutContent,handoutSuffix);
+			if(charChanged.ko){
+				handoutContent = ``;
+				handoutContent += deathFilter(changed);
+				let handoutSuffix = `Dead`;
+				rewriteHandout(handoutContent,handoutSuffix);
+			}
 		}
 
 		//change the death overlays
@@ -418,7 +455,7 @@ const StreamInfo = (function() {
 			handoutContent = ``;
 			handoutContent += deathFilter(changed);
 			let handoutSuffix = `Dead`;
-			handoutContent ? rewriteHandout(handoutContent,handoutSuffix) : false;
+			rewriteHandout(handoutContent,handoutSuffix);
 		}
 
 		//change the main overlay handout
@@ -435,22 +472,57 @@ const StreamInfo = (function() {
 		//set characters that are dead to dead
 		handoutContent = ``;
 		let i = 0;
-		let fire = false;
 		for (let char of changed.chars){
 			//death filter
+			let trigger = false;
+			let classes = `deathContainer player${char.myRank}`;
 			if(char.dsNewFail === 3 && char.hasChanged === false){
-				handoutContent += `<div class="player${char.myRank} dead deathfilter"></div>`;
+				classes += ` dead`;
+				trigger = true;
 			}
 			else if(char.dsNewFail === 3 && char.dsOldFail === 2 && char.hasChanged === true){
-				handoutContent += `<div class="player${char.myRank} die deathfilter"></div>`;
-				fire = true;
+				classes += ` die`;
+				trigger = true;
 			}
-			else if(char.dsNewFail < char.dsOldFail && char.hasChanged === true){
-				handoutContent += `<div class="player${char.myRank} undie deathfilter" style="opacity:0;"></div>`;
-				fire = true;
+			else if(char.dsNewFail < char.dsOldFail && char.dsNewSucc === char.dsOldSucc && char.hasChanged === true){ //undie from deathsaves
+				classes += ` undie`;
+				trigger = true;
+				if(char.dsOldFail === 3 && char.hpNew === 0 || char.dsOldFail === char.dsNewFail && char.hpNew > 0){
+					classes += ` undieFirst`;
+				}
+				else{
+					classes += ` undieContinue`;
+				}
+			}
+			else if(char.hpNew > char.hpOld && char.hpOld <= 0 && char.dsNewFail === 3 && char.hasChanged === true){ //undie from healing with dsf still at 3
+				classes += ` undie`;
+				trigger = true;
+				if(char.dsOldFail === 3){
+					classes += ` undieFirst`;
+				}
+			}
+			else if(char.dsNewSucc === 3 && char.dsOldSucc === 2 && char.hasChanged === true && char.dsOldFail !== 3){
+				classes += ` getup`;
+				classes += ` dsfOld${char.dsOldFail}`;
+				trigger = true;
+			}
+			else if(char.ko){
+				classes += ` ${char.ko}`;
+				trigger = true;
+				if(char.ko === "unconscious"){
+					classes += ` dsfOld${char.dsOldFail} dsfNew${char.dsNewFail}`;
+				}
+				else if(char.ko === "getup"){
+					classes += ` dsfOld${char.dsOldFail}`;
+				}
+			}
+			
+
+			if(trigger){
+				handoutContent += `<div class="${classes}"><div class="deathFilter" style="width: 100%; height: 100%;"></div></div>`;
 			}
 		}
-		return fire ? handoutContent : ``;
+		return handoutContent;
 	}
 
 	function rewriteHandout(handoutContent,handoutSuffix,callback){
@@ -513,14 +585,11 @@ const StreamInfo = (function() {
 			if(!_.isNull(handoutContent)){
 				setTimeout(function(){
 					let storedInits = handoutContent.match(/player[0-9]/g);
-					log(storedInits);
 					if(storedInits[0] != "player0"){
 						let i=0;
 						handoutContent = handoutContent.replace(/player[0-9]/g, match => ++i === 1 ? `player0` : match);
-						log(handoutContent);
 						i=0;
 						handoutContent = handoutContent.replace(/player[0-9]/g, match => ++i === 2 ? storedInits[0] : match);
-						log(handoutContent);
 						handout.set('notes',handoutContent);    
 					}                    
 				},0);
@@ -652,8 +721,8 @@ const StreamInfo = (function() {
 			for (let d of char.dice){
 				if(d){
 					index++;
-					let max = 15;
-					let min = -15;
+					let max = 18;
+					let min = -18;
 					let offsetTop = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 					let offsetLeft = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 					let dicenum = `<div class="player${char.myRank} dice dice${index}" style="opacity: 0;">${d}</div>`;

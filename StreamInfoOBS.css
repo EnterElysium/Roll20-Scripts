@@ -34,6 +34,11 @@
     --med: 0.7;
     --fast: 0.5;
     --veryfast: 0.4;
+    /*deathfilter*/
+    --bgDead: rgba(255, 237, 237,0.15);
+    --shadowDead: inset  0px 0px 150px 50px rgba(8, 0, 0, 1);
+    --bgKO: rgba(144, 0, 0,0.15);
+    --shadowKO: inset  0px 0px 150px 10px rgba(112, 0, 0, 1);
 }
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
@@ -304,8 +309,10 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-infoHandout .userscript-diceareaorigin{
     position:absolute;
-    left: calc(var(--initBoxWidth) - 80px);
-    bottom: calc(var(--initBoxHeight) - 40px);
+    /* left: calc(var(--initBoxWidth) / 15);
+    bottom: calc(var(--initBoxHeight) / 3); */
+    left: calc(var(--initBoxWidth) - 90px);
+    bottom: calc(var(--initBoxHeight) - 20px);
 }
 
 .userscript-infoHandout .userscript-diceareaorigin.userscript-small{
@@ -329,9 +336,8 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     justify-content: center;
     align-items: center;
     font-family: 'Slabo 27px', serif !important;
-    font-size: 1.5em;
-    color: #ffe070;
-    text-shadow: 3px 0px 5px #f17161b3, 0px 3px 5px #f17161b3, -3px 0px 5px #f17161b3, 0px -3px 5px #f17161b3;
+    color: #f3edd6;
+    text-shadow: 3px 0px 5px #8f2623d8, 0px 3px 5px #8f2623d8, -3px 0px 5px #8f2623d8, 0px -3px 5px #8f2623d8;
     animation: dicefade cubic-bezier(0, 0.5, 0.5, 0.5), dicescale cubic-bezier( 0, 0.5, 0.75, 0.5 ), dicemove linear;
     animation-duration: calc(1s + 4s * var(--dicepoolMulti));
 }
@@ -351,24 +357,30 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 @keyframes dicescale {
     0%{
-        transform: scale(0.3);
+        font-size: 0.5em;
     }
     5%{
-        transform: scale(1.2);
+        font-size: 1.8em;
     }
     7%{
-        transform: scale(1);
+        font-size: 1.5em;
     }
     100%{
-        transform: scale(0.35);
+        font-size: 0.5em;
     }
 }
 @keyframes dicemove {
     0%{
-        bottom: 0px;
+        transform: translate(0px, 0px) rotate(0deg);
+    }
+    50%{
+        transform: translate(5px, -40px) rotate(5deg);
+    }
+    75%{
+        transform: translate(7.5px, -60px) rotate(45deg);
     }
     100%{
-        bottom: 80px;
+        transform: translate(10px, -80px) rotate(135deg);
     }
 }
 .userscript-infoHandout .userscript-dice.userscript-dice1{
@@ -432,11 +444,9 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     animation-delay: calc(20s * var(--dicepoolMulti));
 }
 
-
-
 /*death filter*/
 /*only dead*/
-.userscript-infoHandout .userscript-deathfilter{
+/* .userscript-infoHandout .userscript-deathfilter{
     width: var(--initBoxWidth);
     height: var(--initBoxHeight);
     background-color: rgba(48, 0, 0,0.2);
@@ -476,6 +486,150 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 
 .userscript-infoHandout .userscript-deathfilter.userscript-player4{
+    position: fixed;
+    top: var(--initPosTopBottom);
+    left: var(--initPosLeftPC4);
+} */
+
+/*death filter*/
+/*dead and unconscious*/
+.userscript-infoHandout .userscript-deathContainer{
+    width: var(--initBoxWidth);
+    height: var(--initBoxHeight);
+}
+/*set colours for dead and ko'd*/
+.userscript-infoHandout .userscript-deathContainer.userscript-dead, .userscript-infoHandout .userscript-deathContainer.userscript-die{
+    --newBacking: var(--bgDead);
+    --newShadow: var(--shadowDead);
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-dead{
+    --oldBacking: var(--bgDead);
+    --oldShadow: var(--shadowDead);
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-die{
+    --oldBacking: var(--bgKO);
+    --oldShadow: var(--shadowKO);
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-undie{
+    --newBacking: var(--bgKO);
+    --newShadow: var(--shadowKO);
+    --oldBacking: var(--bgDead);
+    --oldShadow: var(--shadowDead);
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-unconscious, .userscript-infoHandout .userscript-deathContainer.userscript-godown, .userscript-infoHandout .userscript-deathContainer.userscript-getup{
+    --newBacking: var(--bgKO);
+    --newShadow: var(--shadowKO);
+    --oldBacking: var(--bgKO);
+    --oldShadow: var(--shadowKO);
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-conscious{
+    --newBacking: var(--bgKO);
+    --newShadow: var(--shadowKO);
+    --oldBacking: var(--bgKO);
+    --oldShadow: var(--shadowKO);
+}
+/*changes in opacity*/
+.userscript-infoHandout .userscript-deathContainer.userscript-conscious{
+    --dsfOldOpacity: 0;
+    --dsfNewOpacity: 0;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-godown{
+    --dsfOldOpacity: 0;
+    --dsfNewOpacity: 0.6;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-getup{
+    --dsfNewOpacity: 0;
+}
+.userscript-infoHandout .userscript-dsfOld0{
+    --dsfOldOpacity: 0.6;
+}
+.userscript-infoHandout .userscript-dsfNew0{
+    --dsfNewOpacity: 0.6;
+}
+.userscript-infoHandout .userscript-dsfOld1{
+    --dsfOldOpacity: 0.82;
+}
+.userscript-infoHandout .userscript-dsfNew1{
+    --dsfNewOpacity: 0.82;
+}
+.userscript-infoHandout .userscript-dsfOld2{
+    --dsfOldOpacity: 1;
+}
+.userscript-infoHandout .userscript-dsfNew2{
+    --dsfNewOpacity: 1;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-die{
+    --dsfOldOpacity: 1;
+    --dsfNewOpacity: 1;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-dead{
+    --dsfOldOpacity: 1;
+    --dsfNewOpacity: 1;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-undie{
+    --dsfNewOpacity: 0;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-undieFirst{
+    --dsfOldOpacity: 1;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-undieContinue{
+    --dsfOldOpacity: 0;
+}
+.userscript-infoHandout .userscript-deathContainer>.userscript-deathFilter{
+    background-color: var(--newBacking);
+    box-shadow: var(--newShadow);
+    opacity: var(--dsfNewOpacity);
+    animation: 2s deathFilter ease-in;
+}
+.userscript-infoHandout .userscript-deathContainer.userscript-godown>.userscript-deathFilter{
+    animation: 0.5s opacityDelay linear, 2s deathFilter 0.5s ease-in;
+}
+@keyframes deathFilter{
+    0%{
+        background-color: var(--oldBacking);
+        box-shadow: var(--oldShadow);
+        opacity: var(--dsfOldOpacity);
+    }
+    100%{
+        background-color: var(--newBacking);
+        box-shadow: var(--newShadow);
+        opacity: var(--dsfNewOpacity);
+    }
+}
+@keyframes opacityDelay{
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 0;
+    }
+}
+
+.userscript-infoHandout .userscript-deathContainer.userscript-player0{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC1);
+}
+
+.userscript-infoHandout .userscript-deathContainer.userscript-player1{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC1);
+}
+
+.userscript-infoHandout .userscript-deathContainer.userscript-player2{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC2);
+}
+
+.userscript-infoHandout .userscript-deathContainer.userscript-player3{
+    position: fixed;
+    top: var(--initPosTopMain);
+    left: var(--initPosLeftPC3);
+}
+
+.userscript-infoHandout .userscript-deathContainer.userscript-player4{
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC4);

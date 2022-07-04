@@ -1,6 +1,6 @@
 /*Loading Screen Title and Versions*/
 #loading-overlay>h1::after{
-  content:"\a DrakonCSS by EnterElysium (version 0.03d) active";
+  content:"\a DrakonCSS by EnterElysium (version 0.03e) active";
     font-family: "Times New Roman", Times, serif;
     text-transform: capitalize;
     font-variant: small-caps;
@@ -200,7 +200,7 @@ div#editor-wrapper::-webkit-scrollbar:horizontal, .note-editable::-webkit-scroll
 }
 
 #rightsidebar .ui-tabs-panel{
-  top:0px;
+  top:-6px;
 }
 
 #playerzone{
@@ -629,11 +629,14 @@ li.dd-folder>div.dd-content .playlistcontrols{
 }
 
 .ui-dialog.ui-widget .ui-dialog-content p>select,.ui-dialog.ui-widget .ui-dialog-content p>input{
-  //border: 1px solid #a0a0a0;
   border-radius: 0px;
   margin-bottom:0px;
   outline:none;
   margin-left:2px;
+  margin-right:2px;
+  width:unset;
+  min-width:fit-content;
+  max-width:100%;
 }
 
 .ui-dialog.ui-widget .ui-dialog-content p>input[type=text]:focus,.ui-dialog.ui-widget .ui-dialog-content p>select:hover, .ui-dialog.ui-widget .ui-dialog-content p>input[type=text]:focus,.ui-dialog.ui-widget .ui-dialog-content p>select:focus-within, #rightsidebar .ui-tabs-panel-input select#speakingas:focus, #rightsidebar .ui-tabs-panel-input select#speakingas:hover{
@@ -912,19 +915,26 @@ background-color: transparent;
 #textchat{
   border-bottom: 1px solid #a0a0a0;
   border-radius:0;
+  height: calc(100% - 149px);
 }
 
 #textchat-input{
   padding-right:5px;
   right:0px;
   border-top:none;
-  border-top: 5px solid #F1F1F1;
+  border-top: 1px solid #a0a0a0;
+  height: 104px;
+}
+
+#textchat-input textarea{
+  width:calc(100% - 14px);
 }
 
 #textchat-input textarea, #textchat-input select#speakingas{
   border-radius: 0;
   border: 1px solid #a0a0a0;
   outline:none;
+  margin-bottom: 0px;
 }
 
 #textchat-input textarea:focus-visible, #textchat-input textarea:hover{
@@ -968,7 +978,7 @@ background-color: transparent;
 @keyframes chatIn {
     from {
         opacity: 0;
-        transform:rotateX(0deg) translateY(100%) scale(.9,0);
+        transform:rotateX(0deg) translateY(100%) scale(0,0);
     }
     to { opacity: 1 }
 }
@@ -1496,7 +1506,15 @@ left:-0.12px;
   text-align: unset;
 }
 
+#textchat td>.inlinerollresult.showtip.tipsy-n-right{
+  font-weight: initial;
+  padding: 0;
+  font-size: 1em;
+}
 
+#textchat .sheet-rolltemplate-default>table>tbody>tr>td:first-child{
+  font-style: italic;
+}
 
 .sheet-rolltemplate-simple.userscript-CritOverrideReq a:hover{
 text-shadow: 0px 0px 6px rgba(206, 15, 105,0.5);

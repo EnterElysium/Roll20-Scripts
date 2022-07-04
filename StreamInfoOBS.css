@@ -2,6 +2,10 @@
 /*---------------------*/
 /*------VARIABLES------*/
 /*---------------------*/
+.userscript-infoHandout{
+    font-family: 'Slabo 27px', serif !important;
+    --fontDefault: 'Slabo 27px', serif !important;
+}
 /*CAST of 4 & 5 PLAYERS*/
 .userscript-infoHandout.userscript-cast4, .userscript-infoHandout.userscript-cast5{
     /*BARS*/
@@ -40,6 +44,13 @@
     --bgKO: rgba(144, 0, 0,0.15);
     --shadowKO: inset  0px 0px 150px 10px rgba(112, 0, 0, 1);
 }
+.userscript-infoHandout.userscript-cast4{
+    /*DICE BOX*/
+    --diceBoxTop:448px;
+    --diceBoxLeft:1406px;
+    --diceBoxWidth:var(--initBoxWidth);
+    --diceBoxHeight:545px;
+}
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
@@ -55,7 +66,7 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 
 .userscript-infoHandout>.userscript-name{
-    display:none !important;
+    display: none !important;
 }
 
 .userscript-infoHandout *{
@@ -98,7 +109,6 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-dmgfloat{
     animation: 4.5s dmgfloatup 0.5s ease-out;
-    font-family: 'Slabo 27px', serif !important;
     line-height: 0px;
     transform-origin: 85% 0%;
     text-shadow: 0px 0px 3px rgba(255, 217, 0, .5);
@@ -335,7 +345,6 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Slabo 27px', serif !important;
     color: #f3edd6;
     text-shadow: 3px 0px 5px #8f2623d8, 0px 3px 5px #8f2623d8, -3px 0px 5px #8f2623d8, 0px -3px 5px #8f2623d8;
     animation: dicefade cubic-bezier(0, 0.5, 0.5, 0.5), dicescale cubic-bezier( 0, 0.5, 0.75, 0.5 ), dicemove linear;
@@ -633,4 +642,62 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC4);
+}
+
+/*Dice Box*/
+.userscript-infoHandout .userscript-dicebox{
+    position: fixed;
+    top: var(--diceBoxTop);
+    left: var(--diceBoxLeft);
+    width: var(--diceBoxWidth);
+    height: var(--diceBoxHeight);
+    padding:6px 18px;
+    overflow: hidden;
+}
+/*Jukebox*/
+.userscript-infoHandout .userscript-nowplaying{
+    display: block;
+    width: calc(var(--diceBoxWidth) * 0.75);
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #ffffff;
+    padding: 6px 12px;
+    border: 1px solid #404040;
+    animation: 2s popdown ease-in-out forwards, 2s popdown 8s ease-in-out forwards reverse;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+@keyframes popdown{
+    0%{
+        opacity: 0;
+    }
+    1%{
+        opacity: 1;
+        transform: translateY(-75px);
+    }
+    100%{
+        opacity: 1;
+        transform: translateY(5px);
+    }
+}
+.userscript-infoHandout .userscript-nowplaying .userscript-musictitle::before{
+    content: "Now Playing";
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 400;
+    font-style: italic;
+    color: #a0a0a0;
+    font-size: 0.5em;
+    display: block;
+    padding-top: 1px;
+    line-height: 14px;
+}
+.userscript-infoHandout .userscript-nowplaying .userscript-musictitle{
+    color: #7e2d40;
+    font-size: 22px;
+    font-variant: small-caps;
+    text-transform: capitalize;
+    font-weight: 700;
+    line-height: 24px;
+    font-family: "Times New Roman", Times, serif;
 }

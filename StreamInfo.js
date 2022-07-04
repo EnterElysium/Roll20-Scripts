@@ -17,6 +17,7 @@ const StreamInfo = (function() {
 	// playersStored = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
 	// const testplayer = ["-MTq8lHfzjgUC_8GLekj"];
 	// const gmID = ["-M7raV5XUzZQgU9bPw7A"];
+	const ignoreMusic = [`CriticalHit`];
 
 	class Changed{
 		constructor(obj=false, prev=false, msg=false){
@@ -47,6 +48,13 @@ const StreamInfo = (function() {
 				}
 			}
 			else{
+				if(obj && typeof obj.get === "function" && obj.get("type") === "jukeboxtrack" && obj.get("playing") === true){
+					this._music = obj.get("title");
+					this._what = `music`;
+				}
+				else{
+					this._music = false;
+				}
 				for (let id of ids) {
 					let char = new Char(id, obj, prev, msg);
 					if(char.hasChanged){
@@ -54,7 +62,6 @@ const StreamInfo = (function() {
 						char.changedHP ? this._what = "hp" : false;
 						char.changedDS ? this._what = "ds" : false;
 						char.changedDice ? this._what = "dice" : false;
-						//char.changedInit ? this._what = "init" : false;
 					}
 					this._chars.push(char);
 				}
@@ -68,6 +75,9 @@ const StreamInfo = (function() {
 		}
 		get what(){
 			return this._what;
+		}
+		get music(){
+			return this._music;
 		}
 		get initHistory(){
 			return this._initHistory;
@@ -417,7 +427,7 @@ const StreamInfo = (function() {
 		if(!obj.get('initiativepage')){
 			return;
 		}
-		if(obj.get("turnorder")){
+		else if(obj.get("turnorder")){
 			parseChanges(createChange(obj, prev));
 			return;
 		}
@@ -427,6 +437,18 @@ const StreamInfo = (function() {
 	on("change:campaign:initiativepage",function(c){
 		c.get('initiativepage') ? turnorderOn(c) : turnorderOff();
 	});
+
+	//playing new track
+	on("change:jukeboxtrack:playing", function(obj) { 
+        if(obj && obj.get("playing") === true){
+			if(ignoreMusic.indexOf(obj.get("title")) >= 0){
+				return;
+			}  
+			else{
+				parseChanges(createChange(obj, null));
+			}
+		}
+    });
 
 	function createChange(obj=false, prev=false, msg=false){
 		return new Changed(obj,prev,msg);
@@ -450,8 +472,8 @@ const StreamInfo = (function() {
 			}
 		}
 
-		//change the death overlays
-		if(changed.what === "ds"){
+		//change the death overlays and music track
+		if(changed.what === "ds" || changed.what === "music"){
 			handoutContent = ``;
 			handoutContent += deathFilter(changed);
 			let handoutSuffix = `Dead`;
@@ -517,11 +539,21 @@ const StreamInfo = (function() {
 				}
 			}
 			
-
 			if(trigger){
 				handoutContent += `<div class="${classes}"><div class="deathFilter" style="width: 100%; height: 100%;"></div></div>`;
 			}
 		}
+		//now playing music
+		if(changed.what === "music"){
+			let musicTitle = changed.music
+			if(musicTitle.match(/^ES_/)){
+				musicTitle = musicTitle.replace(/^ES_|\s-\s.+$/g,"");
+			};
+			musicTitle = musicTitle.replace(/^[0-9]+|_/g," ").trim();
+			musicTitle = musicTitle.replace(/\sby\s.+$/,"");
+			handoutContent += `<div class="dicebox"><div class="jukeboxlayer" style="position: absolute; width: 100%; height: 100%;"><div class="nowplaying" style="opacity: 0;"><span class="musictitle">${musicTitle}</span></div></div></div>`
+		}
+
 		return handoutContent;
 	}
 

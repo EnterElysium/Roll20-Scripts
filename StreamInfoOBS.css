@@ -663,7 +663,7 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     background-color: #ffffff;
     padding: 6px 12px;
     border: 1px solid #404040;
-    animation: 2s popdown ease-in-out forwards, 2s popdown 8s ease-in-out forwards reverse;
+    animation: 2s popdown 6s ease-in-out forwards, 2s popdown 14s ease-in-out forwards reverse;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

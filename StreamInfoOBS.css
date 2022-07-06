@@ -77,62 +77,11 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     width: var(--barwidth) !important;
     height: var(--barheight) !important;
     visibility: hidden;
+    --delayHP: 0s;
 }
-
-.userscript-hpBarFlex{
-    background: linear-gradient(90deg, rgba(38,14,2,0.1) 0%, rgba(40,17,2,0) 20%, rgba(201,173,14,0) 80%, rgba(201,173,14,0.1) 100%), linear-gradient(0deg, rgba(100,0,0,1) 0%, rgba(225,0,0,1) 100%) !important;
-    opacity:0.42;
+.userscript-infoHandout .userscript-hpBarMax.userscript-delayHP{
+    --delayHP: 3s;
 }
-.userscript-hpBarFlex.userscript-dec, .userscript-hpBarFlex.userscript-inc{
-    animation: 0.5s attention 2, 0.5s attention 2s 2;
-}
-@keyframes attention{
-    0%{box-shadow: 0px 0px 0px 0px gold;}
-    50%{box-shadow: 0px 0px 25px 5px gold; opacity:0.55;}
-    100%{box-shadow: 0px 0px 0px 0px gold;}
-}
-
-.userscript-hpBarPush.userscript-dec{
-  animation: 3s hpDec ease-in-out;
-}
-.userscript-hpBarPush.userscript-inc{
-  animation: 3s hpInc ease-in-out;
-}
-@keyframes hpDec {
-    0% {width: 440px}
-    100% {width:0px}
-}
-@keyframes hpInc {
-    0% {width:0px}
-    100% {width: 440px}
-}
-
-.userscript-dmgfloat{
-    animation: 4.5s dmgfloatup 0.5s ease-out;
-    line-height: 0px;
-    transform-origin: 85% 0%;
-    text-shadow: 0px 0px 3px rgba(255, 217, 0, .5);
-}
-@keyframes dmgfloatup {
-    0% {
-        opacity:1;
-        transform: translateY(-12px) scale(0.7);
-    }
-    50%{
-        opacity:0.8;
-    }
-    100% {
-        opacity:0;
-        transform: translateY(-65px) scale(1);
-    }
-}
-.userscript-dmgfloat.userscript-dec{
-    color: darkred;
-}
-.userscript-dmgfloat.userscript-inc{
-    color:green;
-}
-
 .userscript-infoHandout .userscript-hpBarMax.userscript-player0, .userscript-infoHandout .userscript-hpBarMax.userscript-player0{
     position: fixed;
     top: var(--barPosTopMain);
@@ -162,7 +111,94 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     top: var(--barPosTopBottom);
     left: var(--barPosLeftPC4);
 }
+.userscript-hpBarFlex{
+    background: linear-gradient(90deg, rgba(38,14,2,0.1) 0%, rgba(40,17,2,0) 20%, rgba(201,173,14,0) 80%, rgba(201,173,14,0.1) 100%), linear-gradient(0deg, rgba(100,0,0,1) 0%, rgba(225,0,0,1) 100%) !important;
+    opacity:0.42;
+}
+.userscript-hpBarFlex.userscript-dec, .userscript-hpBarFlex.userscript-inc{
+    animation: 0.5s attention 2, 0.5s attention calc(2s + var(--delayHP)) 2;
+}
+@keyframes attention{
+    0%{box-shadow: 0px 0px 0px 0px gold;}
+    50%{box-shadow: 0px 0px 25px 5px gold; opacity:0.55;}
+    100%{box-shadow: 0px 0px 0px 0px gold;}
+}
 
+.userscript-hpBarPush.userscript-dec{
+  animation: 3s hpDec var(--delayHP) ease-in-out, 3s hpDecWait calc(var(--delayHP) - 3s) ease-in-out;
+}
+.userscript-hpBarPush.userscript-inc{
+  animation: 3s hpInc var(--delayHP) ease-in-out, 3s hpIncWait calc(var(--delayHP) - 3s) ease-in-out;
+}
+@keyframes hpDec {
+    0% {width: 440px}
+    100% {width:0px}
+}
+@keyframes hpInc {
+    0% {width:0px}
+    100% {width: 440px}
+}
+@keyframes hpDecWait {
+    0% {width: 440px}
+    100% {width:440px}
+}
+@keyframes hpIncWait {
+    0% {width:0px}
+    100% {width: 0px}
+}
+/*dmg Floats*/
+.userscript-dmgfloat{
+    animation: 4.5s dmgfloatup calc(var(--delayHP) / 3 + 0.5s) ease-out;
+    line-height: 0px;
+    transform-origin: 85% 0%;
+    text-shadow: 0px 0px 3px rgba(255, 217, 0, .5);
+}
+@keyframes dmgfloatup {
+    0% {
+        opacity:1;
+        transform: translateY(-12px) scale(0.7);
+    }
+    50%{
+        opacity:0.8;
+    }
+    100% {
+        opacity:0;
+        transform: translateY(-65px) scale(1);
+    }
+}
+.userscript-dmgfloat.userscript-dec{
+    color: darkred;
+}
+.userscript-dmgfloat.userscript-inc{
+    color:green;
+}
+.userscript-dmgfloat.userscript-none{
+    color: #ada994;
+}
+/*temp hp bars*/
+.userscript-dmgfloat.userscript-tempdec{
+    color: #ada994;
+}
+.userscript-dmgfloat.userscript-tempinc{
+    color:#c4b87d;
+}
+.userscript-tempHPBarFlex{
+    background: linear-gradient(90deg, rgba(38,14,2,0.1) 0%, rgba(40,17,2,0) 20%, rgba(201,173,14,0) 80%, rgba(201,173,14,0.1) 100%), 
+    linear-gradient(0deg, #645831c5 0%, #8d7d4af0 25%, #dcce7a00 26%, #dcce7a00 44%, #c4b87df0 45.1%, #c4b87df0 54.9%, rgba(218,165,32,0) 55%) !important;
+    opacity:0.95;
+    box-sizing: border-box;
+    border-right: 1px solid #c4b87df0;
+}
+/* .userscript-tempHPBarFlex.userscript-dec, .userscript-tempHPBarFlex.userscript-inc{
+
+} */
+.userscript-tempHPBarPush.userscript-dec{
+  animation: 3s hpDec ease-in-out;
+}
+.userscript-tempHPBarPush.userscript-inc{
+  animation: 3s hpInc ease-in-out;
+}
+/*Initiative boxes*/
 .userscript-infoHandout .userscript-initBorder{
     background-image:url(https://s3.amazonaws.com/files.d20.io/images/291777366/3YbIbemHbFxh1z9EC5J6zA/max.png);
 }
@@ -454,53 +490,6 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 
 /*death filter*/
-/*only dead*/
-/* .userscript-infoHandout .userscript-deathfilter{
-    width: var(--initBoxWidth);
-    height: var(--initBoxHeight);
-    background-color: rgba(48, 0, 0,0.2);
-    box-shadow: inset  0px 0px 100px 8px rgba(48, 0, 0, .95)
-}
-
-.userscript-infoHandout .userscript-die{
-    animation: 2s fadeIn ease-out;
-}
-
-.userscript-infoHandout .userscript-undie{
-    animation: 2s fadeOut ease-in;
-}
-
-.userscript-infoHandout .userscript-deathfilter.userscript-player0{
-    position: fixed;
-    top: var(--initPosTopMain);
-    left: var(--initPosLeftPC1);
-}
-
-.userscript-infoHandout .userscript-deathfilter.userscript-player1{
-    position: fixed;
-    top: var(--initPosTopMain);
-    left: var(--initPosLeftPC1);
-}
-
-.userscript-infoHandout .userscript-deathfilter.userscript-player2{
-    position: fixed;
-    top: var(--initPosTopMain);
-    left: var(--initPosLeftPC2);
-}
-
-.userscript-infoHandout .userscript-deathfilter.userscript-player3{
-    position: fixed;
-    top: var(--initPosTopMain);
-    left: var(--initPosLeftPC3);
-}
-
-.userscript-infoHandout .userscript-deathfilter.userscript-player4{
-    position: fixed;
-    top: var(--initPosTopBottom);
-    left: var(--initPosLeftPC4);
-} */
-
-/*death filter*/
 /*dead and unconscious*/
 .userscript-infoHandout .userscript-deathContainer{
     width: var(--initBoxWidth);
@@ -591,7 +580,7 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     animation: 2s deathFilter ease-in;
 }
 .userscript-infoHandout .userscript-deathContainer.userscript-godown>.userscript-deathFilter{
-    animation: 0.5s opacityDelay linear, 2s deathFilter 0.5s ease-in;
+    animation: 2.5s opacityDelay linear, 2s deathFilter 2.5s ease-in;
 }
 @keyframes deathFilter{
     0%{

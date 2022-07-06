@@ -160,7 +160,7 @@ const healBot = (function() {
 		})[0];
 		spawnFx(token.get('left'),token.get('top'),'burn-holy');
 
-		let msgYouDidHeals = `${character.get("name")} healed for ${healAmount} Hit Points.`
+		let msgYouDidHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>${character.get("name")} healed for ${healAmount} Hit Points.</i>}}`
 		chatter(null,"w",msg.who,msgYouDidHeals,null,"{noarchive:true}");
 	};
 
@@ -173,7 +173,7 @@ const healBot = (function() {
 		})[0];
 		let character = getObj('character', token.get("represents"));
 
-		if(StreamInfo.apiIDs().indexOf(character.id) > 0){
+		if(StreamInfo.apiIDs().includes(character.id)){
 			healCharacter(msg,character.id,healAmount);
 		}
 		else{
@@ -185,12 +185,12 @@ const healBot = (function() {
 			token.set("bar1_value",hpCur);
 			spawnFx(token.get('left'),token.get('top'),'burn-holy') 
 
-			
+			//&{template:traits} {{source=name}} {{name=rname}} {{description=description}}
 
-			let msgYouDidHeals = `You healed ${character.get("name")} for ${healAmount} Hit Points.`
+			let msgYouDidHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>You healed ${character.get("name")} for ${healAmount} Hit Points.</i>}}`
 			chatter(null,"w",msg.who,msgYouDidHeals,null,"{noarchive:true}");
 
-			let msgYouGotHeals = `${character.get("name")} was healed for ${healAmount} Hit Points.`
+			let msgYouGotHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>${character.get("name")} was healed for ${healAmount} Hit Points.</i>}}`
 			chatter(null,"w",["character",character],msgYouGotHeals,null,"{noarchive:true}");
 		}
 	};

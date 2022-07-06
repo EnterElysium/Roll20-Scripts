@@ -105,10 +105,27 @@ on('ready', () => {
 
                         temporalTempHPCache[character.id]={
                             when: now,
-                            toHeal: toHeal
+                            toHeal: toHeal,
                         };
                         temp_hp.set('current', newTmpHP);
                         checkTempHP(temp_hp);
+
+                        if(StreamInfo.apiIDs().includes(character.id) && toHeal > 0){
+                            /*StreamInfo*/
+                            let cloneNewHP = findObjs({
+                                _characterid: character.id,
+                                _type: "attribute",
+                                name: "hp",
+                            })[0];
+                            cloneNewHP = JSON.parse(JSON.stringify(cloneNewHP));
+                            let cloneOldHP = JSON.parse(JSON.stringify(cloneNewHP));
+                            cloneOldHP.current = parseFloat(prev[bar]);
+                            cloneNewHP.current = parseInt(cloneNewHP.current,10) + toHeal;
+                            let cloneNewTempHP = JSON.parse(JSON.stringify(temp_hp));
+                            let cloneOldTempHP = JSON.parse(JSON.stringify(temp_hp));
+                            cloneOldTempHP.current += toHeal;
+                            toStreamInfo(cloneNewHP,cloneOldHP,cloneNewTempHP,cloneOldTempHP);
+                      }
                     }
 
                     hp += temporalTempHPCache[character.id].toHeal;
@@ -133,7 +150,7 @@ on('ready', () => {
         }
     };
 
-    const onAttributeChange = (obj) => {
+    const onAttributeChange = (obj,prev) => {
         if(obj.get('name') === TempHPAttributeName){
             log("Attribute Changed, checking tempHP");
             checkTempHP(obj);
@@ -153,6 +170,15 @@ on('ready', () => {
         ChatSetAttr.registerObserver('change',onAttributeChange);
         log("ChatSetAttr Reg Obs");
     }
+
+    function toStreamInfo(cloneNewHP=0,cloneOldHP=0,cloneNewTempHP=0,cloneOldTempHP=0){
+		if (typeof StreamInfo == "undefined" || StreamInfo === null){
+			logger(`StreamInfo script not detected, unable to alter overlay from TempHP`);
+		}
+		else{
+			StreamInfo.apiHPandTemp(cloneNewHP,cloneOldHP,cloneNewTempHP,cloneOldTempHP);
+		}
+	};
 
     assureTempHPMarkers();
 });

@@ -10,7 +10,7 @@ const StreamInfo = (function() {
 	Max hp dec doesn't call anything - bar stays incorrect
 	*/
 
-	const scriptIndex = {"name":"StreamInfo","version":"v0.01","apiHP":apiHP,"apiIDs":apiIDs,};
+	const scriptIndex = {"name":"StreamInfo","version":"v0.01","apiHP":apiHP,"apiHPandTemp":apiHPandTemp,"apiIDs":apiIDs,};
 
 	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
 	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
@@ -29,7 +29,7 @@ const StreamInfo = (function() {
 				//get whose turn it is
 				if(obj && obj.get("turnorder") && JSON.parse(obj.get("turnorder")).length > 0){
 					let tokID = JSON.parse(obj.get("turnorder"))[0].id;
-					let token = getObj('graphic', tokID);
+					let token = getObj('graphic', tokID);Max
 					let init = ids.indexOf(token.get("represents"))+1;
 					this._initHistory[0] = init;
 				}
@@ -55,13 +55,22 @@ const StreamInfo = (function() {
 				else{
 					this._music = false;
 				}
+				//set individual characters
 				for (let id of ids) {
 					let char = new Char(id, obj, prev, msg);
 					if(char.hasChanged){
 						this._who = id;
+						//this is legacy code
 						char.changedHP ? this._what = "hp" : false;
 						char.changedDS ? this._what = "ds" : false;
 						char.changedDice ? this._what = "dice" : false;
+						char.changedTempHP ? this._what = "temphp" : false;
+						//this is new code
+						this._whatArray = [];
+						char.changedHP ? this._whatArray.push("hp") : false;
+						char.changedDS ? this._whatArray.push("ds") : false;
+						char.changedDice ? this._whatArray.push("dice") : false;
+						char.changedTempHP ? this._whatArray.push("hp_temp") : false;
 					}
 					this._chars.push(char);
 				}
@@ -76,6 +85,9 @@ const StreamInfo = (function() {
 		get what(){
 			return this._what;
 		}
+		get whatArray(){
+			return this._whatArray;
+		}
 		get music(){
 			return this._music;
 		}
@@ -88,11 +100,24 @@ const StreamInfo = (function() {
 		set initHistoryNow(old){
 			this._initHistory[1] = old;
 		}
+		checkChanged(arg){
+			if(!Array.isArray(this.whatArray) || this.whatArray.length === 0){
+				logger(`checkedChanged had an error that was avoided due to ${this.whatArray} being incorrectly formed`);
+				return false;
+			}
+			else if(Array.isArray(arg) && arg.length > 0){ //OR check
+				return arg.some(e => this.whatArray.includes(e))
+			}
+			else{
+				return this.whatArray.includes(arg);
+			}
+		}
 	}
 
 	class Char{
 		constructor(id=false,charNew=false,charOld=false,msg=false){
-			if(playerIsGM(msg.playerid)){
+			let fromArray = Array.isArray(charNew) && Array.isArray(charOld) ? true : false;
+			if(playerIsGM(msg && msg.playerid)){
 				this._id = "gm";
 				this._pid = "gm";
 				this._rank = [0,ids.length];
@@ -147,8 +172,8 @@ const StreamInfo = (function() {
 					this._hpOldMax = Char.sanitiseHP(charOld["max"]);
 					this._hpOld = Char.capBounds(Char.sanitiseHP(charOld["current"]),this.hpOldMax);
 				}
-				else if(charNew && typeof charNew.get === "undefined" && charNew.name === "hp" && charNew._characterid === id){
-					logger(`firing a pass from healBot`);
+				else if(charNew && typeof charNew.get === "undefined" && !fromArray && charNew._characterid === id && charNew.name === `hp`){
+					logger(`firing a pass from external script`);
 					this._changedHP = true;
 					this._hpDeltaTrue = Char.sanitiseHP(charNew.current) - Char.sanitiseHP(charOld.current);
 					//bound reset ignore
@@ -158,10 +183,31 @@ const StreamInfo = (function() {
 					else if(Char.sanitiseHP(charNew.current) >= Char.sanitiseHP(charNew.max) && Char.sanitiseHP(charOld.current) >= Char.sanitiseHP(charNew.max)){
 						this._changedHP = false;
 					}
+					else if(this._hpDeltaTrue == 0){
+						this._changedHP = false;
+					}
 					this._hpNewMax = Char.sanitiseHP(charNew.max);
 					this._hpNew = Char.capBounds(Char.sanitiseHP(charNew.current),this.hpNewMax);
 					this._hpOldMax = Char.sanitiseHP(charOld.max);
 					this._hpOld = Char.capBounds(Char.sanitiseHP(charOld.current),this.hpOldMax);
+				}
+				else if(charNew && typeof charNew.get === "undefined" && fromArray && charNew.some(e => e._characterid === id) && charNew.some(e => e.name === `hp`)){
+					let charNewE = charNew.find(e => e.name === `hp`);
+					let charOldE = charOld.find(e => e.name === `hp`);
+					logger(`firing a pass from external script passing an array`);
+					this._changedHP = true;
+					this._hpDeltaTrue = Char.sanitiseHP(charNewE.current) - Char.sanitiseHP(charOldE.current);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNewE.current) <= 0 && Char.sanitiseHP(charOldE.current) <= 0){
+						this._changedHP = false;
+					}
+					else if(Char.sanitiseHP(charNewE.current) >= Char.sanitiseHP(charNewE.max) && Char.sanitiseHP(charOldE.current) >= Char.sanitiseHP(charNewE.max)){
+						this._changedHP = false;
+					}
+					this._hpNewMax = Char.sanitiseHP(charNewE.max);
+					this._hpNew = Char.capBounds(Char.sanitiseHP(charNewE.current),this.hpNewMax);
+					this._hpOldMax = Char.sanitiseHP(charOldE.max);
+					this._hpOld = Char.capBounds(Char.sanitiseHP(charOldE.current),this.hpOldMax);
 				}
 				else{
 					this._changedHP = false;
@@ -175,6 +221,62 @@ const StreamInfo = (function() {
 					this._hpNew = Char.capBounds(Char.sanitiseHP(attrHP.get("current")),this.hpNewMax);
 					this._hpOldMax = this.hpNewMax;
 					this._hpOld = this.hpNew;
+				}
+				/*Temp HP*/
+				if (charNew && typeof charNew.get === "function" && charNew.get("name") === "hp_temp" && id == charNew.get("characterid")){
+					this._changedTempHP = true;
+					this._tempHPDeltaTrue = Char.sanitiseHP(charNew.get("current")) - Math.max(Char.sanitiseHP(charOld["current"]),0);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNew.get("current")) <= 0 && Char.sanitiseHP(charOld["current"]) <= 0){
+						this._changedTempHP = false;
+					}
+					this._tempHPNew = Char.sanitiseHP(charNew.get("current"))
+					this._tempHPOld = Char.sanitiseHP(charOld["current"])
+				}
+				else if(charNew && typeof charNew.get === "undefined" && !fromArray && charNew._characterid === id && charNew.name === `hp_temp`){
+					logger(`firing a pass from external script`);
+					this._changedTempHP = true;
+					this._tempHPDeltaTrue = Char.sanitiseHP(charNew.current) - Char.sanitiseHP(charOld.current);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNew.current) <= 0 && Char.sanitiseHP(charOld.current) <= 0){
+						this._changedTempHP = false;
+					}
+					else if(this._tempHPDeltaTrue == 0){
+						this._changedTempHP = false;
+					}
+					this._tempHPNew = Char.sanitiseHP(charNew.current);
+					this._tempHPOld = Char.sanitiseHP(charOld.current);
+				}
+				else if(charNew && typeof charNew.get === "undefined" && fromArray && charNew.some(e => e._characterid === id) && charNew.some(e => e.name === `hp_temp`)){
+					let charNewE = charNew.find(e => e.name === `hp_temp`);
+					let charOldE = charOld.find(e => e.name === `hp_temp`);
+					logger(`firing a pass from external script passing an array`);
+					this._changedTempHP = true;
+					this._tempHPDeltaTrue = Char.sanitiseHP(charNewE.current) - Char.sanitiseHP(charOldE.current);
+					//bound reset ignore
+					if(Char.sanitiseHP(charNewE.current) <= 0 && Char.sanitiseHP(charOldE.current) <= 0){
+						this._changedTempHP = false;
+					}
+					this._tempHPNew = Char.sanitiseHP(charNewE.current);
+					this._tempHPOld = Char.sanitiseHP(charOldE.current);
+				}
+				else{
+					this._changedTempHP = false;
+					this._tempHPDeltaTrue = 0;
+					let attrTempHP = findObjs({
+						_characterid: id,
+						_type: "attribute",
+						name: "hp_temp"
+					});
+					if(attrTempHP[0] && attrTempHP.length > 0){
+						attrTempHP = attrTempHP[0];
+						this._tempHPNew = Char.sanitiseHP(attrTempHP.get("current"));
+						this._tempHPOld = this.tempHPNew;
+					}
+					else{
+						this._tempHPNew = 0;
+						this._tempHPOld = 0;
+					}
 				}
 				/*Unconsciousness*/
 				this._ko = Char.koState(this.hpNew,this.hpOld);
@@ -280,6 +382,30 @@ const StreamInfo = (function() {
 		get hpOldPercent(){
 			return 100*this.hpOld/this.hpOldMax;
 		}
+		get changedTempHP() {
+			return this._changedTempHP;
+		}
+		get tempHPNew() {
+			return this._tempHPNew;
+		}
+		get tempHPOld() {
+			return this._tempHPOld;
+		}
+		get tempHPDelta() {
+			return this.tempHPNew-this.tempHPOld;
+		}
+		get tempHPDeltaTrue() {
+			return this._tempHPDeltaTrue;
+		}
+		get tempHPDeltaPercent() {
+			return this.tempHPNewPercent-this.tempHPOldPercent;
+		}
+		get tempHPNewPercent(){
+			return 100*this.tempHPNew/this.hpNewMax;
+		}
+		get tempHPOldPercent(){
+			return 100*this.tempHPOld/this.hpOldMax;
+		}
 		get ko(){
 			return this._ko;
 		}
@@ -308,10 +434,13 @@ const StreamInfo = (function() {
 			return this._changedDice;
 		}
 		get hasChanged() {
-			if(this.changedHP || this.changedDS || this.changedInit || this.changedDice){
+			if(this.changedHP || this.changedDS || this.changedInit || this.changedDice || this.changedTempHP){
 				return true;
 			}
 			return false;
+		}
+		get dmgTaken(){
+			return this.hpDeltaTrue+this.tempHPDeltaTrue;
 		}
 		obfuscateDice(){
 			let diceObfuscated = [];
@@ -417,6 +546,10 @@ const StreamInfo = (function() {
 			parseChanges(createChange(obj, prev));
 			return;
 		}
+		if(obj.get("name") === "hp_temp" && prev["name"] === "hp_temp"){
+			parseChanges(createChange(obj, prev));
+			return;
+		}
 		if(obj.get("name").toLowerCase().includes("deathsave") && prev["name"].toLowerCase().includes("deathsave")){
 			parseChanges(createChange(obj, prev));
 			return;
@@ -456,7 +589,7 @@ const StreamInfo = (function() {
 
 	function parseChanges(changed){
 		//change the Character handouts
-		if(changed.what === "hp" || changed.what === "ds" || changed.what === "dice" ){
+		if(changed.checkChanged([`hp`,`ds`,`dice`,`hp_temp`])){
 			let charChanged = changed.chars.find(char => char.hasChanged === true); 
 			if(!charChanged){
 				return;
@@ -667,12 +800,21 @@ const StreamInfo = (function() {
 			hpState = "none";
 		}
 		//dmg floaties
-		if (char.changedHP && Math.abs(char.hpDeltaTrue) > 0) {
-			dmgfloat = char.hpDeltaTrue < 0 ? `-` : `+`;
-			dmgfloat += Math.abs(char.hpDeltaTrue).toString();
-			dmgfloat = `<div class="player${char.myRank} dmgpos ${hpState}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="player${char.myRank} dmgfloat ${hpState}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.hpDeltaTrue) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
+		if ((char.changedHP || char.changedTempHP) && Math.abs(char.dmgTaken) > 0) {
+			if(hpState === `none`){
+				if (char.changedTempHP && char.tempHPNew < char.tempHPOld) {
+					hpState += " tempdec";
+				}
+				else if (char.changedTempHP && char.tempHPNew > char.tempHPOld) {
+					hpState += " tempinc";
+				}
+			}
+			dmgfloat = char.dmgTaken < 0 ? `-` : `+`;
+			dmgfloat += Math.abs(char.dmgTaken).toString();
+			dmgfloat = `<div class="player${char.myRank} dmgpos ${hpState}" style="height:0px; text-align:right; width: ${toPerCSS(char.hpOldPercent)}"><p class="player${char.myRank} dmgfloat ${hpState}" style="opacity:0; font-family: 'Times New Roman', Times, serif; font-size:${Math.min(Math.abs(char.dmgTaken) / 3, 50) + 25}px;">${dmgfloat}</p></div>`;
 		}
-		//if HP has decreaesed
+		//HP CONSTRUCTION
+		//if HP has decreased
 		if (char.changedHP && char.hpNew < char.hpOld) {
 			pushCSS += ` display:inline-block; width:0px;`;
 			flexCSS += ` min-width: ${toPerCSS(char.hpNewPercent)}; max-width: ${toPerCSS(char.hpOldPercent)};`;
@@ -688,12 +830,42 @@ const StreamInfo = (function() {
 		let hpBarPush = `<div class="player${char.myRank} hpBarPush ${hpState}" style="${pushCSS}"></div>`;
 		let hpBarFlex = `<div class="player${char.myRank} hpBarFlex ${hpState}" style="${flexCSS}">${hpBarPush}</div>`;
 
+		//TEMPHP CONSTRUCTION
+		let pushCSStempHP = `height:100%;`;
+		let flexCSStempHP = `position:absolute;left:0px;top:70%;height:30%; display:inline-block; background-color: goldenrod;`;
+		let tempHPState = "";
+		if (char.changedTempHP && char.tempHPNew < char.tempHPOld) {
+			tempHPState = "dec";
+		}
+		else if (char.changedTempHP && char.tempHPNew > char.tempHPOld) {
+			tempHPState = "inc";
+		}
+		else {
+			tempHPState = "none";
+		}
+		//if TempHP has decreaesed
+		if (char.changedTempHP && char.tempHPNew < char.tempHPOld) {
+			pushCSStempHP += ` display:inline-block; width:0px;`;
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPNewPercent)}; max-width: ${toPerCSS(char.tempHPOldPercent)};`;
+		} //if TempHP has increased
+		else if (char.changedTempHP && char.tempHPNew > char.tempHPOld) {
+			pushCSStempHP += ` display:inline-block; width:500px;`;
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPOldPercent)}; max-width: ${toPerCSS(char.tempHPNewPercent)};`;
+		}
+		else { //if TempHP the same (or not changed)
+			pushCSStempHP += ` display:none;`;
+			flexCSStempHP += ` width: ${toPerCSS(char.tempHPNewPercent)};`;
+		}
+		let tempHPBarPush = `<div class="player${char.myRank} tempHPBarPush ${tempHPState}" style="${pushCSStempHP}"></div>`;
+		let tempHPBarFlex = `<div class="player${char.myRank} tempHPBarFlex ${tempHPState}" style="${flexCSStempHP}">${tempHPBarPush}</div>`;
+
 		//create the deathsaves
 		let dsArea = dsConstructor(char);
-		let diceArea = diceConstructor(char);
+		//create the dice area
+		let diceArea = diceConstructor(char);findObjs
 
 		//make the full hpbar container
-		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}" style="width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${diceArea}${hpBarFlex}${dsArea}</div>`;
+		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}${char.changedHP && char.changedTempHP ? ` delayHP` : ``}" style="position: relative; width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${diceArea}${hpBarFlex}${tempHPBarFlex}${dsArea}</div>`;
 		charContent += `${name}${hpBarMax}<br>`;
 		return charContent;
 	}
@@ -873,7 +1045,10 @@ const StreamInfo = (function() {
     };
 
 	function apiHP(obj,prev){
-		parseChanges(createChange(obj, prev));
+		parseChanges(createChange(obj,prev));
+	};
+	function apiHPandTemp(obj,prev,obj2,prev2){
+		parseChanges(createChange([obj,obj2],[prev,prev2]));
 	};
 
 	function apiIDs(){

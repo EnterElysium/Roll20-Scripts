@@ -916,15 +916,15 @@ const StreamInfo = (function() {
 		//if TempHP has decreaesed
 		if (char.changedTempHP && char.tempHPNew < char.tempHPOld) {
 			pushCSStempHP += ` display:inline-block; width:0px;`;
-			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPNewPercent)}; max-width: ${toPerCSS(char.tempHPOldPercent)};`; //cap at 100%
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPNewPercent,100)}; max-width: ${toPerCSS(char.tempHPOldPercent,100)};`; //cap at 100%
 		} //if TempHP has increased
 		else if (char.changedTempHP && char.tempHPNew > char.tempHPOld) {
 			pushCSStempHP += ` display:inline-block; width:580px;`;
-			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPOldPercent)}; max-width: ${toPerCSS(char.tempHPNewPercent)};`; //cap at 100%
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPOldPercent,100)}; max-width: ${toPerCSS(char.tempHPNewPercent,100)};`; //cap at 100%
 		}
 		else { //if TempHP the same (or not changed)
 			pushCSStempHP += ` display:none;`;
-			flexCSStempHP += ` width: ${toPerCSS(char.tempHPNewPercent)};`;
+			flexCSStempHP += ` width: ${toPerCSS(char.tempHPNewPercent,100)};`;
 		}
 		let tempHPBarPush = `<div class="player${char.myRank} tempHPBarPush ${tempHPState}" style="${pushCSStempHP}"></div>`;
 		let tempHPBarFlex = `<div class="player${char.myRank} tempHPBarFlex ${tempHPState}" style="${flexCSStempHP}">${tempHPBarPush}</div>`;
@@ -1012,8 +1012,11 @@ const StreamInfo = (function() {
 		}
 	};
 
-	function toPerCSS(num){
+	function toPerCSS(num,upperBound){
 		num = Math.abs(num);
+		if(upperBound){
+			num = Math.min(num,upperBound);
+		};
 		num = Math.round(num);
 		num = num.toString();
 		num += `%`

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Slabo+27px&display=swap');
 /*---------------------*/
-/*------MAPSCREEN------*/
+/*------RP-SCREEN------*/
 /*------VARIABLES------*/
 /*---------------------*/
 .userscript-infoHandout{
@@ -8,33 +8,33 @@
     --fontDefault: 'Slabo 27px', serif !important;
 }
 /*CAST of 4 & 5 PLAYERS*/
-.userscript-infoHandout.userscript-cast4, .userscript-infoHandout.userscript-cast5{
+.userscript-infoHandout.userscript-cast4{
     /*BARS*/
     /*bar size*/
-    --barwidth: 437px;
-    --barheight: 38px;
+    --barwidth: 572px;
+    --barheight: 55px;
     /*bar position*/
-    --barPosTopMain: 398px;
-    --barPosTopBottom: 898px;
-    --barPosLeftGM: 62px;
-    --barPosLeftPC1: 512px;
-    --barPosLeftPC2: 962px;
-    --barPosLeftPC3: 1412px;
-    --barPosLeftPC4: 1412px;
+    --barPosTopMain: 509px;
+    --barPosTopBottom: 942px;
+    --barPosLeftGM: 91px;
+    --barPosLeftPC1: 1255px;
+    --barPosLeftPC2: 91px;
+    --barPosLeftPC3: 1255px;
+    --barPosLeftPC4: 1255px;
     /*INIT BORDERS*/
     /*image*/
-    --initBorderImg4: url(https://s3.amazonaws.com/files.d20.io/images/291777366/3YbIbemHbFxh1z9EC5J6zA/max.png);
+    --initBorderImg4: url(https://s3.amazonaws.com/files.d20.io/images/293476631/daBxf6fKa_kXdaptZTCFag/max.png);
     /*border size*/
-    --initBoxWidth: 448px;
-    --initBoxHeight: 249px;
+    --initBoxWidth: 585px;
+    --initBoxHeight: 350px;
     /*border position*/
-    --initPosTopMain: 145px;
-    --initPosTopBottom: 545px;
-    --initPosLeftGM: 56px;
-    --initPosLeftPC1: 507px;
-    --initPosLeftPC2: 956px;
-    --initPosLeftPC3: 1406px;
-    --initPosLeftPC4: 1406px;
+    --initPosTopMain: 146px;
+    --initPosTopBottom: 577px;
+    --initPosLeftGM: 84px;
+    --initPosLeftPC1: 1251px;
+    --initPosLeftPC2: 84px;
+    --initPosLeftPC3: 1251px;
+    --initPosLeftPC4: 1251px;
     /*deathsaves*/
     /*dice floats*/
     --slow: 1.0;
@@ -49,10 +49,10 @@
 }
 .userscript-infoHandout.userscript-cast4{
     /*DICE BOX*/
-    --diceBoxTop:448px;
-    --diceBoxLeft:1406px;
-    --diceBoxWidth:var(--initBoxWidth);
-    --diceBoxHeight:545px;
+    --diceBoxTop:145px;
+    --diceBoxLeft:699px;
+    --diceBoxWidth:522px;
+    --diceBoxHeight:811px;
 }
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
@@ -99,13 +99,13 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-infoHandout .userscript-hpBarMax.userscript-player2, .userscript-infoHandout .userscript-hpBarMax.userscript-player2{
     position: fixed;
-    top: var(--barPosTopMain);
+    top: var(--barPosTopBottom);
     left: var(--barPosLeftPC2);
 }
 
 .userscript-infoHandout .userscript-hpBarMax.userscript-player3, .userscript-infoHandout .userscript-hpBarMax.userscript-player3{
     position: fixed;
-    top: var(--barPosTopMain);
+    top: var(--barPosTopBottom);
     left: var(--barPosLeftPC3);
 }
 
@@ -187,10 +187,12 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 .userscript-tempHPBarFlex{
     background: linear-gradient(90deg, rgba(38,14,2,0.1) 0%, rgba(40,17,2,0) 20%, rgba(201,173,14,0) 80%, rgba(201,173,14,0.1) 100%), 
-    linear-gradient(0deg, #645831c5 0%, #8d7d4af0 25%, #dcce7a00 26%, #dcce7a00 44%, #c4b87df0 45.1%, #c4b87df0 54.9%, rgba(218,165,32,0) 55%) !important;
+    linear-gradient(0deg, #645831c5 0%, #8d7d4af0 27%, #dcce7a00 35%, #dcce7a00 45%, #c4b87df0 47.1%, #c4b87df0 54.9%, rgba(218,165,32,0) 55%) !important;
     opacity:0.95;
     box-sizing: border-box;
-    border-right: 1px solid #c4b87df0;
+    border-right: 2px solid #c4b87df0;
+    top:75% !important;
+    height:25% !important;
 }
 /* .userscript-tempHPBarFlex.userscript-dec, .userscript-tempHPBarFlex.userscript-inc{
 
@@ -246,13 +248,13 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-infoHandout .userscript-initBorder.userscript-player2{
     position: fixed;
-    top: var(--initPosTopMain);
+    top: var(--initPosTopBottom);
     left: var(--initPosLeftPC2);
 }
 
 .userscript-infoHandout .userscript-initBorder.userscript-player3{
     position: fixed;
-    top: var(--initPosTopMain);
+    top: var(--initPosTopBottom);
     left: var(--initPosLeftPC3);
 }
 
@@ -290,24 +292,24 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     left:8px;
 }
 
-/*adjust individual plavement up and down*/
+/*adjust individual placement up and down*/
 .userscript-infoHandout .userscript-deathsaves .userscript-succ1{
-    top: 3px;
-}
-.userscript-infoHandout .userscript-deathsaves .userscript-succ2{
-    top: 5px;
-}
-.userscript-infoHandout .userscript-deathsaves .userscript-succ3{
-    top: 7px;
-}
-.userscript-infoHandout .userscript-deathsaves .userscript-fail1{
-    top: 0px;
-}
-.userscript-infoHandout .userscript-deathsaves .userscript-fail2{
     top: 1px;
 }
+.userscript-infoHandout .userscript-deathsaves .userscript-succ2{
+    top: 3px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-succ3{
+    top: 5px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fail1{
+    top: -4px;
+}
+.userscript-infoHandout .userscript-deathsaves .userscript-fail2{
+    top: -3px;
+}
 .userscript-infoHandout .userscript-deathsaves .userscript-fail3{
-    top: 2px;
+    top: -2px;
 }
 
 /*animate in and out saves*/
@@ -361,7 +363,7 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     /* left: calc(var(--initBoxWidth) / 15);
     bottom: calc(var(--initBoxHeight) / 3); */
     left: calc(var(--initBoxWidth) * 0.77);
-    bottom: calc(var(--initBoxHeight) * 0.92);
+    bottom: calc(var(--initBoxHeight) * 1);
 }
 
 .userscript-infoHandout .userscript-diceareaorigin.userscript-small{

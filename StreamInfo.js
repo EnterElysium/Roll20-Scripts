@@ -23,29 +23,8 @@ const StreamInfo = (function() {
 		constructor(obj=false, prev=false, msg=false){
 			this._chars = [];
 			this._what = false;
-			if(obj && typeof obj.get === "function" && obj.get("turnorder")){
-				this._what = "init";
-				this._initHistory = [0,0];
-				//get whose turn it is
-				if(obj && obj.get("turnorder") && JSON.parse(obj.get("turnorder")).length > 0){
-					let tokID = JSON.parse(obj.get("turnorder"))[0].id;
-					let token = getObj('graphic', tokID);Max
-					let init = ids.indexOf(token.get("represents"))+1;
-					this._initHistory[0] = init;
-				}
-				else{
-					this._initHistory[0] = 0;
-				}
-				//get whose turn it was
-				if(prev && prev["turnorder"] && JSON.parse(prev["turnorder"]).length > 0){
-					let tokOldID = JSON.parse(prev["turnorder"])[0].id;
-					let tokenOld = getObj('graphic', tokOldID);
-					let oldInit = ids.indexOf(tokenOld.get("represents"))+1;
-					this._initHistory[1] = oldInit;
-				}
-				else{
-					this._initHistory[1] = 0;
-				}
+			if((obj && typeof obj.get === "function" && obj.get("turnorder")) || (prev && prev["turnorder"] && JSON.parse(prev["turnorder"]).length > 0)){
+				this.constructInit(obj, prev);
 			}
 			else{
 				if(obj && typeof obj.get === "function" && obj.get("type") === "jukeboxtrack" && obj.get("playing") === true){
@@ -76,6 +55,50 @@ const StreamInfo = (function() {
 				}
 			}
 		}
+		
+		constructInit(obj, prev) {
+			this._what = "init";
+			this._initHistory = [0, 0];
+			//get whose turn it is
+			if (obj && obj.get("turnorder") && JSON.parse(obj.get("turnorder")).length > 0) {
+				let iNew = JSON.parse(obj.get("turnorder")).findIndex(index => 
+					index.id && index.source == undefined && index.id.length > 9 && getObj('graphic', index.id) !== undefined && typeof getObj('graphic', index.id).get === "function" && getObj('graphic', index.id).get("name") != undefined && getObj('graphic', index.id).get("name").startsWith(`Round `) === false
+				);
+				if(iNew >= 0){
+					let tokID = JSON.parse(obj.get("turnorder"))[iNew].id;
+					let token = getObj('graphic', tokID);
+					let init = ids.indexOf(token.get("represents")) + 1;
+					this._initHistory[0] = init;
+				}
+				else{
+					this._initHistory[0] = 0;
+				}
+			}
+			else {
+				this._initHistory[0] = 0;
+			}
+			//get whose turn it was
+			if (prev && prev["turnorder"] && JSON.parse(prev["turnorder"]).length > 0) {
+				let prevRev = JSON.parse(prev["turnorder"]);
+				prevRev.reverse(prevRev.push(prevRev.shift()));
+				let iOld = prevRev.findIndex(index => 
+					index.id && index.source == undefined && index.id.length > 9 && getObj('graphic', index.id) !== undefined && typeof getObj('graphic', index.id).get === "function" && getObj('graphic', index.id).get("name") != undefined && getObj('graphic', index.id).get("name").startsWith(`Round `) === false
+				);
+				if(iOld >= 0){
+					let tokID = prevRev[iOld].id;
+					let token = getObj('graphic', tokID);
+					let init = ids.indexOf(token.get("represents")) + 1;
+					this._initHistory[1] = init;
+				}
+				else{
+					this._initHistory[1] = 0;
+				}
+			}
+			else {
+				this._initHistory[1] = 0;
+			}
+		}
+
 		get chars(){
 			return this._chars;
 		}
@@ -102,7 +125,6 @@ const StreamInfo = (function() {
 		}
 		checkChanged(arg){
 			if(!Array.isArray(this.whatArray) || this.whatArray.length === 0){
-				logger(`checkedChanged had an error that was avoided due to ${this.whatArray} being incorrectly formed`);
 				return false;
 			}
 			else if(Array.isArray(arg) && arg.length > 0){ //OR check
@@ -583,6 +605,46 @@ const StreamInfo = (function() {
 		}
     });
 
+	on("chat:message", function(msg) {
+		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!streaminfo")==0){
+			Chandler(msg);
+			return;
+		}
+	});
+
+	//API CHAT HANDLER
+	function Chandler(msg){
+		//check if ppgpspcp exist and creature if not
+		// parse arguments into a hierarchy of objects
+		let args = msg.content.split(/\s+--/).map(arg=>{
+			let cmds = arg.split(/\s+/);
+			return {
+				"cmd": cmds.shift().toLowerCase(),
+				"params": cmds
+			};
+		});
+		args.shift();
+		//update the underlay on opening turnorder or closing turnorder
+		if(_.indexOf(_.pluck(args,"cmd"),"turnorder") != -1){
+			for (let flag of args) {
+				if(flag.cmd === `turnorder`){
+					chatUpdate(`turnorder`,flag.params[0]);
+				}
+			}
+		}
+	};
+
+	function chatUpdate(which,action){
+		if(which === `turnorder`){
+			if(action === `open`){
+				parseChanges(createChange(Campaign(), false));
+			}
+			if(action === `close`){
+				parseChanges(createChange(false, JSON.parse(JSON.stringify(Campaign()))));
+			}
+		}
+	}
+
 	function createChange(obj=false, prev=false, msg=false){
 		return new Changed(obj,prev,msg);
 	}
@@ -725,6 +787,9 @@ const StreamInfo = (function() {
 	};
 
 	function turnorderOn(c){
+		if(!c.get || typeof c.get !== "function" || c.get("turnorder") == false){
+			return;
+		}
 		let changed = createChange(c)
 		let handout = getHandout(`Init`);
 		handout.get('notes', function(handoutContent){
@@ -744,7 +809,6 @@ const StreamInfo = (function() {
 	};
 
 	function turnorderOff(){
-		log("turn order hidden")
 		let handout = getHandout(`Init`);
 		handout.get('notes', function(handoutContent){
 			if(!_.isNull(handoutContent)){
@@ -816,11 +880,17 @@ const StreamInfo = (function() {
 		//HP CONSTRUCTION
 		//if HP has decreased
 		if (char.changedHP && char.hpNew < char.hpOld) {
-			pushCSS += ` display:inline-block; width:0px;`;
-			flexCSS += ` min-width: ${toPerCSS(char.hpNewPercent)}; max-width: ${toPerCSS(char.hpOldPercent)};`;
+			if(char.tempHPNew === 0){ //block changes to HP when still having temp hp
+				pushCSS += ` display:inline-block; width:0px;`;
+				flexCSS += ` min-width: ${toPerCSS(char.hpNewPercent)}; max-width: ${toPerCSS(char.hpOldPercent)};`;
+			}
+			else{
+				pushCSS += ` display:none;`;
+				flexCSS += ` width: ${toPerCSS(char.hpOldPercent)};`;
+			}
 		} //if HP has increased
 		else if (char.changedHP && char.hpNew > char.hpOld) {
-			pushCSS += ` display:inline-block; width:500px;`;
+			pushCSS += ` display:inline-block; width:580px;`;
 			flexCSS += ` min-width: ${toPerCSS(char.hpOldPercent)}; max-width: ${toPerCSS(char.hpNewPercent)};`;
 		}
 		else { //if HP the same (or not changed)
@@ -846,11 +916,11 @@ const StreamInfo = (function() {
 		//if TempHP has decreaesed
 		if (char.changedTempHP && char.tempHPNew < char.tempHPOld) {
 			pushCSStempHP += ` display:inline-block; width:0px;`;
-			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPNewPercent)}; max-width: ${toPerCSS(char.tempHPOldPercent)};`;
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPNewPercent)}; max-width: ${toPerCSS(char.tempHPOldPercent)};`; //cap at 100%
 		} //if TempHP has increased
 		else if (char.changedTempHP && char.tempHPNew > char.tempHPOld) {
-			pushCSStempHP += ` display:inline-block; width:500px;`;
-			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPOldPercent)}; max-width: ${toPerCSS(char.tempHPNewPercent)};`;
+			pushCSStempHP += ` display:inline-block; width:580px;`;
+			flexCSStempHP += ` min-width: ${toPerCSS(char.tempHPOldPercent)}; max-width: ${toPerCSS(char.tempHPNewPercent)};`; //cap at 100%
 		}
 		else { //if TempHP the same (or not changed)
 			pushCSStempHP += ` display:none;`;
@@ -865,7 +935,7 @@ const StreamInfo = (function() {
 		let diceArea = diceConstructor(char);findObjs
 
 		//make the full hpbar container
-		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}${char.changedHP && char.changedTempHP ? ` delayHP` : ``}" style="position: relative; width:500px; height:50px; background-color:#f1f1f1;">${dmgfloat}${diceArea}${hpBarFlex}${tempHPBarFlex}${dsArea}</div>`;
+		let hpBarMax = `<div class="player${char.myRank} hpBarMax ${hpState}${char.changedHP && char.changedTempHP ? ` delayHP` : ``}" style="position: relative; width:580px; height:50px; background-color:#f1f1f1;">${dmgfloat}${diceArea}${hpBarFlex}${tempHPBarFlex}${dsArea}</div>`;
 		charContent += `${name}${hpBarMax}<br>`;
 		return charContent;
 	}
@@ -901,7 +971,7 @@ const StreamInfo = (function() {
 			
 			let dsLeft = `<div class="player${char.myRank} successes" style="display: inline-block; width:50%; text-align: left;">${dss}</div>`;
 			let dsRight = `<div class="player${char.myRank} fails" style="direction: rtl; display: inline-block; width:50%; text-align: right;">${dsf}</div>`;
-			let dsArea = `<div class="player${char.myRank} deathsaves" style="width:500px; white-space:nowrap;">${dsLeft}${dsRight}</div>`;
+			let dsArea = `<div class="player${char.myRank} deathsaves" style="width:580px; white-space:nowrap;">${dsLeft}${dsRight}</div>`;
 			
 			return `${dsArea}`;
 		}
@@ -934,7 +1004,7 @@ const StreamInfo = (function() {
 				}
 			}			
 			let diceOrigin = `<div class="player${char.myRank} diceareaorigin ${dicepool}" style="font-size: ${fontsize}px; position: absolute;">${dice}</div>`;
-			let diceArea = `<div class="player${char.myRank} dicearea" style="width:500px; white-space:nowrap;">${diceOrigin}</div>`;
+			let diceArea = `<div class="player${char.myRank} dicearea" style="width:580px; white-space:nowrap;">${diceOrigin}</div>`;
 			return `${diceArea}`;
 		}
 		else{
@@ -965,24 +1035,6 @@ const StreamInfo = (function() {
 		handout.set('notes', '');
         return handout;
 	};
-
-	// on("chat:message", function(msg) {
-
-	// 	if (msg.type==="api" && msg.content.toLowerCase().indexOf("!tipPost")==0){
-	// 		Chandler(msg);
-	// 		return;
-	// 	}
-	// });
-
-	// //API CHAT HANDLER
-	// function Chandler(msg){
-	// 	let args = msg.content.split(/\s+/);
-
-	// 	let charid = args[1];
-
-	// 	//MAIN STUFF HERE
-
-	// };
 
 	//error handler
 	function errorHandler(errorMsg,who,useChat,useLog){

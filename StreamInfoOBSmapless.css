@@ -407,16 +407,16 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 }
 @keyframes dicescale {
     0%{
-        font-size: 0.5em;
+        font-size: 0.7em;
     }
     5%{
-        font-size: 1.8em;
+        font-size: 2em;
     }
     7%{
-        font-size: 1.5em;
+        font-size: 1.7em;
     }
     100%{
-        font-size: 0.5em;
+        font-size: 0.7em;
     }
 }
 @keyframes dicemove {

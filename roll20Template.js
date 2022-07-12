@@ -1,10 +1,10 @@
-const tipPost = (function() {	
+const scriptname = (function() {	
 
-	const scriptIndex = {"name":"tipPost","version":"v0.01",};
+	const scriptIndex = {"name":"scriptname","version":"v0.01",};
 
 	on("chat:message", function(msg) {
 
-		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!tipPost")==0){
+		if (msg.type==="api" && msg.content.toLowerCase().indexOf("!scriptname")==0){
 			Chandler(msg);
 			return;
 		}

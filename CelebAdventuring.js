@@ -173,6 +173,10 @@ const celebrity = (function() {
 		get market() {
 			return this._market;
 		}
+		_id;
+		get id() {
+			return this._id;
+		}
 		_name;
 		get name() {
 			return this._name;
@@ -195,6 +199,7 @@ const celebrity = (function() {
 		}
 		constructor(m){
 			this._market = m;
+			this._id = m.id;
 			this._name = m.get("name").replace(/^Market: /g,"");
 			this._size = parseInt(m.get("bar1_max"))/10;
 			this._endorsement = [parseInt(m.get("bar1_value")),parseInt(m.get("bar1_max"))];
@@ -501,7 +506,7 @@ const celebrity = (function() {
 	}
 
 	class xLicencing{
-		static growth(options,dice){ //CONTINUE FROM HERE
+		static growth(options,dice){
 			//list options
 			let seban = options.includes(`seban`);
 			//generate market
@@ -510,6 +515,218 @@ const celebrity = (function() {
 			let container = markets.results();
 			//send chat
 			eCore.chat(container,null,null,`noarchive`);
+		}
+	}
+
+	class MarketInfo extends Market{
+		_halfEndorsement = false;
+		get halfEndorsement() {
+			return this._halfEndorsement;
+		}
+		_fullEndorsement = false;
+		get fullEndorsement() {
+			return this._fullEndorsement;
+		}
+		_halfLicencing = false;
+		get halfLicencing() {
+			return this._halfLicencing;
+		}
+		_fullLicencing = false;
+		get fullLicencing() {
+			return this._fullLicencing;
+		}
+		_halfFame = false;
+		get halfFame() {
+			return this._halfFame;
+		}
+		_fullFame = false;
+		get fullFame() {
+			return this._fullFame;
+		}
+		constructor(m){
+			super(m);
+			if(this.e >= this.em/2){
+				this._halfEndorsement = true;
+				if(this.e === this.em){
+					this._fullEndorsement = true;
+				}
+			}
+			if(this.l >= this.lm/2){
+				this._halfLicencing = true;
+				if(this.l === this.lm){
+					this._fullLicencing = true;
+				}
+			}
+			if(this.l >= this.lm/2){
+				this._halfFame = true;
+				if(this.l === this.lm){
+					this._fullFame = true;
+				}
+			}
+		}
+		thresholds(){ //continue from here
+			let html = ``;
+			html += `<div style="${CSS.nameHeader}">Market: ${this.name}</div>`;
+			//add endorsement
+			if(this.fullEndorsement || this.halfEndorsement){
+				html += `<div>Endorsement (${this.e}/${this.em})</div>`;
+				if(this.fullEndorsement){
+					html += `<div>Due to being at maximum</div>`
+					for(let info of this.infoFullEndorsement){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+				if(this.halfEndorsement){
+					html += `<div>Due to being above half</div>`
+					for(let info of this.infoHalfEndorsement){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+			}
+			//add licencing
+			html += `<div style="${CSS.spacerbarNoTop}"></div>`
+			if(this.fullLicencing || this.halfLicencing){
+				html += `<div>Licencing (${this.l}/${this.lm})</div>`;
+				if(this.fullLicencing){
+					html += `<div>Due to being at maximum</div>`
+					for(let info of this.infoFullLicencing){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+				if(this.halfLicencing){
+					html += `<div>Due to being above half</div>`
+					for(let info of this.infoHalfLicencing){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+			}
+			//add fame
+			html += `<div style="${CSS.spacerbarNoTop}"></div>`
+			if(this.fullFame || this.halfFame){
+				html += `<div>Fame (${this.f}/${this.fm})</div>`;
+				if(this.fullFame){
+					html += `<div>Due to being at maximum</div>`
+					for(let info of this.infoFullFame){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+				if(this.halfFame){
+					html += `<div>Due to being above half</div>`
+					for(let info of this.infoHalfFame){
+						html += MarketInfo.infoConstructor(info);
+					}
+				}
+			}
+			
+			let container = `<div style="${CSS.container}">${html}</div>`
+
+			return container;
+		}
+		static infoConstructor(info){
+			let html = ``;
+			html += `<ul>`;
+			info.name ? html += `<li>${info.name}</li>`: false ;
+			info.benefit ? html += `<li>${info.benefit}</li>`: false ;
+			info.detriment ? html += `<li>${info.detriment}</li>`: false ;
+			html += `</ul>`;
+			return html;
+		}
+		static view(id){
+			//token/market from id
+			let token = findObjs({
+				_id: id,
+				_type:"graphic",
+				_subtype: "token",
+				layer: "objects",
+				represents: "",
+				_pageid: Campaign().get("playerpageid"),
+			})[0];
+			//generate market
+			let market = new MarketInfo(token);
+			//construct menu
+			let container = market.thresholds();
+			//send chat
+			eCore.chat(container,null,null,`noarchive`);
+		}
+		_infoHalfEndorsement = [{
+			"name": `Don't You Know Who I Am?`,
+			"benefit": `It is not in the interests of your benefactors for you to languish in jail. You no longer get arrested for trivial offenses. For more serious offences you can expect any sentence you receive to be halved.`,
+			"detriment": `Roll a d20, on a 1 you lose 1 Licencing and 1 Endorsement, and on a 2 you lose 1 Endorsement as word gets out about covering for your antics.`,
+		}, {
+			"name": `You Come Recommended`,
+			"benefit": `While not guaranteed that all factions will welcome you all the time, being this well connected means your can get your foot in the door with the majority of businesses, institutions, and people of power and they are at least likely to grant you an audience and hear you out.`,
+			"detriment": `Word travels, any discourtesy you show someone at a meeting gained on others recommendation results in a loss of Endorsement (dependant on the exact discourtesy, insulting them vs attacking them for example).`,
+		}, {
+			"name": `Borrow the Coach`,
+			"benefit": `Routine mundane travel within the Market costs you nothing.`,
+			"detriment": `While travelling in such a fashion you will be expected to defend other travellers.`,
+		},];
+		get infoHalfEndorsement() {
+			return this._infoHalfEndorsement;
+		}
+		_infoFullEndorsement = [{
+			"name": `House in the Famptons`,
+			"benefit": ` You may spend a week of downtime in Luxury lifestyle being pampered at the expense of your benefactors. You gain the benefits of the Relaxation downtime activity or you may Prepare for a downtime action immediately following this one, with a duration of no more than two workweeks.<br><br>If you prepare, in the following downtime action you may reroll one d20 rolled as part of one ability check.`,
+			"detriment": `Roll a d6, on a 1 you have to spend the week doing the Side-Quest downtime activity instead.`,
+		}, {
+			"name": `Arcane Support`,
+			"benefit": `Once per day, you may request the casting of a spell of any level up to half the Market Size +1 (rounded up) from a contact, provided you provide half the cost of any material components.`,
+			"detriment": `They will only do so while it remains in their interest, and they know the reasons for doing so.`,
+		}, {
+			"name": `Call in Markers`,
+			"benefit": `You gain either d8 Fame or Licencing in the Market (your choice).`,
+			"detriment": `You lose the same amount plus two Endorsement. Overuse may result in diminishing returns.`,
+		},];
+		get infoFullEndorsement() {
+			return this._infoFullEndorsement;
+		}
+		_infoHalfLicencing = [{
+			"name": `Brand Recognition`,
+			"benefit": `All business you own in the region may add the Market Size to their profit roll.`,
+			"detriment": ``,
+		},];
+		get infoHalfLicencing() {
+			return this._infoHalfLicencing;
+		}
+		_infoFullLicencing = [{
+			"name": `Free Swag`,
+			"benefit": `You gain a 50% discount on all personal non-magical equipment and gear.`,
+			"detriment": ``,
+		},];
+		get infoFullLicencing() {
+			return this._infoFullLicencing;
+		}
+		_infoHalfFame = [{
+			"name": `On the House`,
+			"benefit": `You no longer need to pay for basic Ale (or similar) in taverns and inns as long as there are people to buy them for you.`,
+			"detriment": `While benefiting in this manner, fans will hang on your every word, not much you say will stay private.`,
+		}, {
+			"name": `Spare Room`,
+			"benefit": `You can find lodging and food of Poor standard for your band for free at short notice, as you lodge at a fans house.`,
+			"detriment": `You may be expected to regale them with a tale, defend them from attack, or perhaps have awkward conversations about personal space.`,
+		}, {
+			"name": `A Fan Gave Me This`,
+			"benefit": `Once per day, you may produce a non-magical item worth up to 1 GP that a fan could have conceivable given to you previously.`,
+			"detriment": `When you use the item, roll a d20. On a 1 it was actually sent from a Rival or detractor and fails turning into an annoying but harmless prank.`,
+		},];
+		get infoHalfFame() {
+			return this._infoHalfFame;
+		}
+		_infoFullFame = [{
+			"name": `Would You Kindly`,
+			"benefit": `Once per day, whenever travelling in a suitable area you may summon up to your Charisma modifier + d4 Commoners from a suitable gathering of fans to carry out basic tasks for you.`,
+			"detriment": `Your fans are relentless in looking for you. Attempts to hide your identity or evade them are at disadvantage as they relentless track you down.`,
+		}, {
+			"name": `Fan Mob`,
+			"benefit": `You may rally a group of diehard supporters. The number of fans is proportionate to the population of the location you are in, in a city this might be several hundred, in a small village it might be two.`,
+			"detriment": `Spend 1 Fame from your local Market to use.`,
+		}, {
+			"name": `Shelter`,
+			"benefit": `A group of diehard, devoted fans, take you in and shelter you. They will shield you from the law or anyone else searching for you, risking their lives as necessary. While there you gain the benefit of a Poor lifestyle.`,
+			"detriment": `Spend 1 Fame per day from your local Market to use.`,
+		},];
+		get infoFullFame() {
+			return this._infoFullFame;
 		}
 	}
 
@@ -523,12 +740,17 @@ const celebrity = (function() {
 			options = options.concat(eCore.msgCompare.advanced(args,`menu`));
 			MarketsMenu.view(msg.who,options)
 		}
-		else if(eCore.msgCompare.adv(args,`xlicencing`)){
+		if(eCore.msgCompare.adv(args,`xlicencing`)){
 			let options = [];
 			options = options.concat(eCore.msgCompare.advanced(args,`xlicencing`));
 			let dice = eCore.dice.extract(msg);
 			xLicencing.growth(options,dice);
-		};
+		}
+		if(eCore.msgCompare.adv(args,`marketinfo`)){
+			let options = [];
+			options = options.concat(eCore.msgCompare.advanced(args,`marketinfo`));
+			MarketInfo.view(options[0]);
+		}
 	});
 
 	return scriptIndex;

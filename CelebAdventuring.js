@@ -3,108 +3,62 @@ const celebrity = (function() {
 	const scriptIndex = {"name":"CelebrityAdventuring","version":"v0.01",};
 
 	class CSS{
-		static _bold = `font-weight: bold;`;
-		static get bold() {
-			return CSS._bold;
-		}
-		static _btnDefault = `color: #000; background-color: transparent; padding: 0;`;
-		static get btnDefault() {
-			return CSS._btnDefault;
-		}
-		static _table = `font-size:12px; width: 100%; list-style: none; margin:0px; white-space: nowrap;`;
-		static get table() {
-			return CSS._table;
-		}
-		static _li = `text-align: right; margin-bottom:-0.2px;`;
-		static get li() {
-			return CSS._li;
-		}
-		static _rowHeader = `font-size:1.2em; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
-		static get rowHeader() {
-			return CSS._rowHeader;
-		}
-		static _row = `border-top: 1px solid #a0a0a0;`;
-		static get row() {
-			return CSS._row;
-		}
-		static _nameHeader = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;`;
-		static get nameHeader() {
-			return CSS._nameHeader;
-		}
-		static _name = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; margin-top:0px; font-style: italic;`;
-		static get name() {
-			return CSS._name;
-		}
-		static _stat = `text-align:center; padding:2px 0px; display: inline-block; width: 10%; vertical-align: middle; margin-top:-0.7px;`;
-		static get stat() {
-			return CSS._stat;
-		}
-		static _container = `border:1px solid #333; background-color: #fff; padding:4px 6px;`;
-		static get container() {
-			return CSS._container;
-		}
-		static _spacerbarNoTop = `display: block; margin-bottom: 8px; border-bottom: 1px solid #7e2d40;`;
-		static get spacerbarNoTop() {
-			return CSS._spacerbarNoTop;
-		}
-		static _spacerbarNoBottom = `display: block; margin-top: 8px; border-top: 1px solid #7e2d40;`;
-		static get spacerbarNoBottom() {
-			return CSS._spacerbarNoBottom;
-		}
-		static _head = `text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
-		static get head() {
-			return CSS._head;
-		}
-		static _subhead = `text-align: center; display: block; font-style: italic; color: #a0a0a0; font-size: 0.7em; line-height: 1.1em;`;
-		static get subhead() {
-			return CSS._subhead;
-		}
-		static _elaBlockHolder = `text-align: center; display: block; font-size: 12px;`;
-		static get elaBlockHolder() {
-			return CSS._elaBlockHolder;
-		}
-		static _elaBlock = `text-align: center; display: inline-block; vertical-align: middle; border: 1px solid #f1f1f1; padding: 4px;`;
-		static get elaBlock() {
-			return CSS._elaBlock;
-		}
-		static _elaSubBlock = `text-align: center; vertical-align: middle;`;
-		static get elaSubBlock() {
-			return CSS._elaSubBlock;
-		}
-		static _elaSmallText = `font-size: 0.8em; line-height: 1em;`;
-		static get elaSmallText() {
-			return CSS._elaSmallText;
-		}
-		static _liSub = `text-align: right; margin-bottom:-0.2px; background-color: #f1f1f1; padding: 0px 3px; text-align: left;`;
-		static get liSub() {
-			return CSS._liSub;
-		}
-		static _resultDice = `width: 8%; display: inline-block; text-align: right; vertical-align: middle; font-weight: bold; margin-top: -0.1em;`;
-		static get resultDice() {
-			return CSS._resultDice;
-		}
-		static _resultMsg = `width: 92%; display: inline-block; text-align: left; white-space: normal; vertical-align: middle; font-size: 0.9em; line-height: 1em; vertical-align: middle; padding: 0.3em 0px;`;
-		static get resultMsg() {
-			return CSS._resultMsg;
-		}
-		static _diceSuccess = `color: goldenrod;`;
-		static get diceSuccess() {
-			return CSS._diceSuccess;
-		}
-		static _diceFail = `color: darkred;`;
-		static get diceFail() {
-			return CSS._diceFail;
-		}
-		static _diceNothing = ``;
-		static get diceNothing() {
-			return CSS._diceNothing;
+		static bold = `font-weight: bold;`;
+		static title = `font-size: 1.25em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40; margin: 0.1em 0em;`;
+		static btnInvis = `color: #000; background-color: transparent; padding: 0; border: none;`;
+		static table = `font-size:12px; width: 100%; list-style: none; margin:0px; white-space: nowrap;`;
+		static li = `text-align: right;`;
+		static rowHeader = `font-size:1.2em; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
+		static row = `border-top: 1px solid #a0a0a0;`;
+		static nameHeader = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;`;
+		static name = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; margin-top:0px; font-style: italic;`;
+		static stat = `text-align:center; padding:2px 0px; display: inline-block; width: 10%; vertical-align: middle;`;
+		static container = `border:1px solid #333; background-color: #fff; padding:4px 6px 6px 6px;`;
+		static spacerbar = `display: block; margin: 4px 8px; border-bottom: 1px solid #7e2d40;`;
+		static spacerbarNoTop = `display: block; margin: 0px 8px 8px 8px; border-bottom: 1px solid #7e2d40;`;
+		static spacerbarNoBottom = `display: block; margin: 8px 8px 0px 8px; border-top: 1px solid #7e2d40;`;
+		static head = `text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
+		static subhead = `text-align: center; display: block; font-style: italic; color: #a0a0a0; font-size: 0.7em; line-height: 1.15em;`;
+		static elaBlockHolder = `text-align: center; display: block; font-size: 12px; margin-top:4px;`;
+		static elaBlock = `text-align: center; display: inline-block; vertical-align: middle; padding: 4px;`;
+		static elaSubBlock = `text-align: center; vertical-align: middle;`;
+		static elaSmallText = `font-size: 0.8em; line-height: 1em;`;
+		static liSub = `text-align: right; background-color: #f1f1f1; padding: 0px 3px; text-align: left;`;
+		static resultDice = `width: 8%; display: inline-block; text-align: right; vertical-align: middle; font-weight: bold;`;
+		static resultMsg = `width: 92%; display: inline-block; text-align: left; white-space: normal; vertical-align: middle; font-size: 0.9em; line-height: 1em; vertical-align: middle; padding: 0.3em 0px;`;
+		static diceSuccess = `color: goldenrod;`;
+		static diceFail = `color: darkred;`;
+		static diceNothing = ``;
+		static headleft2 = `display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
+		static subheadleft2 = `display: block; font-style: italic; color: #a0a0a0; font-size: 0.7em; line-height: 1.1em;`;
+		static ulinfo = `font-size:11px; list-style: none; margin: 0;`;
+		static liinfo = `line-height: 1.15em;`;
+		static liname = `font-weight: bold; font-style: italic; margin: 6px 0px 0px 0px; padding: 1px 4px; border-bottom: 1px solid #a0a0a0;`;
+		static libenefit = `text-align: justify; text-justify: inter-word; padding: 6px 3px 0px 3px;`;
+		static lidetriment = `text-align: justify; text-justify: inter-word; padding: 6px 3px 0px 3px;`;
+		static liarrowright = `<span style="color: #009900;">›</span>`;
+		static liarrowright2 = `<span style="color: #009900;">»</span>`;
+		static liarrowleft = `<span style="color: #aa0000;">‹</span>`;
+		static liarrowleft2 = `<span style="color: #aa0000;">«</span>`;
+		static arrows = `font-weight: bold; font-size: 1.25em; line-height: 0.8em; padding-right: 0.5em;`
+		static litext = ``;
+		static liarrow(type){
+			let html = ``;
+			switch (type){
+				case `benefitmax`: html = CSS.liarrowright2; break;
+				case `benefithalf`: html = CSS.liarrowright; break;
+				case `detrimentmax`: html = CSS.liarrowleft2; break;
+				case `detrimenthalf`: html = CSS.liarrowleft; break;
+				default: return;
+			}
+			return html.slice(0,html.indexOf(`style="`)+(`style="`).length) + CSS.arrows + html.slice(html.indexOf(`style="`)+(`style="`).length);
 		}
 		static thresholds(c,m){
 			if(c === m){
-				return ` color: #970; background-color: gold; font-weight: bold;`;
+				return ` color: #ffc737; font-weight: bold;`;
 			}
 			else if(c >= m/2){
-				return ` color: #555; background-color: #d7d7d7; font-weight: bold;`;
+				return ` color: #939EA7; font-weight: bold;`;
 			}
 			else if(c > 0){
 				return ` color: #000;`;
@@ -260,6 +214,24 @@ const celebrity = (function() {
 		set f(v){
 			this._fame[0] = v;
 		}
+		get halfEndorsement() {
+			return this.e >= this.em/2 ? true : false;
+		}
+		get fullEndorsement() {
+			return this.e === this.em ? true : false;
+		}
+		get halfLicencing() {
+			return this.l >= this.lm/2 ? true : false;
+		}
+		get fullLicencing() {
+			return this.l === this.lm ? true : false;
+		}
+		get halfFame() {
+			return this.f >= this.fm/2 ? true : false;
+		}
+		get fullFame() {
+			return this.f === this.fm ? true : false;
+		}
 		changeValue(change,stat){
 			if(change === 0){
 				return `No Change`; //no change
@@ -370,32 +342,167 @@ const celebrity = (function() {
 		}
 	}
 
+	class Titles{
+		static none = "Unknown Quantities";
+		static low = {
+			"endorsement":`Influential Adventurers`,
+			"licencing":`Entrepreneurs`,
+			"fame":`Celebrity Adventurers`,
+			"tie":`Renowned Adventurers`,
+		}
+		static med = {
+			"endorsement":`Powerbrokers`,
+			"licencing":`Executive Adventurers`,
+			"fame":`Famed Adventurers`,
+			"tie":`Exalted Adventurers`,
+		}
+		static high = {
+			"endorsement":`Grey Eminences`,
+			"licencing":`Adventuring Tycoons`,
+			"fame":`Adventuring Icons`,
+			"tie":`Legends`,
+		}
+		static analyseStatus(markets){
+			let ptfull = 4;
+			let pthalf = 3;
+			let ptone = 2;
+			let ptMax = 0;
+			let ptE = 0;
+			let ptL = 0;
+			let ptF = 0;
+			for(let m of markets){
+				ptMax += m.size*10*ptfull;
+				if(m.e === m.em){
+					ptE += m.e*ptfull;
+				}
+				else if(m.e >= m.em/2){
+					ptE += m.e*pthalf;
+				}
+				else if(m.e > 0){
+					ptE += m.e*ptone;
+				}
+				else{
+					ptE += 0;
+				}
+				if(m.l === m.lm){
+					ptL += m.l*ptfull;
+				}
+				else if(m.l >= m.lm/2){
+					ptL += m.l*pthalf;
+				}
+				else if(m.l > 0){
+					ptL += m.l*ptone;
+				}
+				else{
+					ptL += 0;
+				}
+				if(m.f === m.fm){
+					ptF += m.f*ptfull;
+				}
+				else if(m.f >= m.fm/2){
+					ptF += m.f*pthalf;
+				}
+				else if(m.f > 0){
+					ptF += m.f*ptone;
+				}
+				else{
+					ptF += 0;
+				}
+			}
+			return Titles.assignStatus(ptMax,ptE,ptL,ptF);
+			//return `<br>${Titles.assignStatus(ptMax,ptE,ptL,ptF)}<br>Max${ptMax}pts E${ptE}pts L${ptL}pts F${ptF}pts`;
+		}
+		static assignStatus(max,e,l,f){
+			let eHalf = false;
+			e >= max/2 ? eHalf = true : false;
+			let lHalf = false;
+			l >= max/2 ? lHalf = true : false;
+			let fHalf = false;
+			f >= max/2 ? fHalf = true : false;
+			let arrayHalfs = [eHalf,lHalf,fHalf].filter(v => v === true).length;
+			let eQuarter = false;
+			e >= max/4 ? eQuarter = true : false;
+			let lQuarter = false;
+			l >= max/4 ? lQuarter = true : false;
+			let fQuarter = false;
+			f >= max/4 ? fQuarter = true : false;
+			let arrayQuarters = [eQuarter,lQuarter,fQuarter].filter(v => v === true).length;
+			let eEighth = false;
+			e >= max/8 ? eEighth = true : false;
+			let lEighth = false;
+			l >= max/8 ? lEighth = true : false;
+			let fEighth = false;
+			f >= max/8 ? fEighth = true : false;
+			let arrayEighths = [eEighth,lEighth,fEighth].filter(v => v === true).length;
+			if(arrayHalfs > 1){
+				return this.high.tie;
+			}
+			else if(arrayHalfs > 0){
+				switch(true){
+					case eHalf: return this.high.endorsement;
+					case lHalf: return this.high.licencing;
+					case fHalf: return this.high.fame;
+				}
+			}
+			else if(arrayQuarters > 1){
+				return this.med.tie;
+			}
+			else if(arrayQuarters > 0){
+				switch(true){
+					case eQuarter: return this.med.endorsement;
+					case lQuarter: return this.med.licencing;
+					case fQuarter: return this.med.fame;
+				}
+			}
+			else if(arrayEighths > 1){
+				return this.low.tie;
+			}
+			else if(arrayEighths > 0){
+				switch(true){
+					case eEighth: return this.low.endorsement;
+					case lEighth: return this.low.licencing;
+					case fEighth: return this.low.fame;
+				}
+			}
+			else{
+				return this.none;
+			}
+		}
+	};
+
 	class MarketsMenu extends Markets{
 		constructor(){
 			super()
 		}
-		menu(ela=false){
-			let table = `<ul style="${CSS.table}">`;
-			table += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
-			table += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
-			table += `<div style="${CSS.stat}">Size</div>`;
-			table += `<div style="${CSS.stat}">E.</div>`;
-			table += `<div style="${CSS.stat}">L.</div>`;
-			table += `<div style="${CSS.stat}">F.</div>`;
-			table += `</div></li>`;
+		menu(ela=false,silent){
+			let html = ``;
+			html += `<div style="${CSS.title}">Market Analysis</div>`;
+			html += `<div style="${CSS.subhead}">Current Status: ${Titles.analyseStatus(this.list)}</div>`;
+			//table += `<div style="${CSS.subhead}">Known Markets: ${this.num}</div>`;
+			html += `<div style="${CSS.spacerbar}"></div>`;
+			html += `<ul style="${CSS.table}">`;
+			html += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
+			html += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
+			html += `<div style="${CSS.stat}">Size</div>`;
+			html += `<div style="${CSS.stat}">E.</div>`;
+			html += `<div style="${CSS.stat}">L.</div>`;
+			html += `<div style="${CSS.stat}">F.</div>`;
+			html += `</div></li>`;
 			for(let m of this.list){
 				log(`Market: ${m.name} | Size: ${m.size} | E:${m.e} L:${m.l} F:${m.f}`);
-				table += `<li style="${CSS.li}"><div style="${CSS.row}">`;
-				table += `<div style="${CSS.name}">${m.name}</div>`;
-				table += `<div style="${CSS.stat}">${m.size}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
-				table += `</div></li>`;
+				html += `<li style="${CSS.li}"><div style="${CSS.row}">`;
+				let url = `!celebrity --marketinfo ${m.id}${silent ? ` silent`:` `}`;
+				url = eCore.utility.encodeHTML(url);
+				html += `<div style="${CSS.name}"><a style="${CSS.btnInvis}" href="${url}">${m.name}</a></div>`;
+				html += `<div style="${CSS.stat}">${m.size}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
+				html += `</div></li>`;
 			}
-			table += `</ul>`;
+			html += `</ul>`;
 	
-			let container = `<div style="${CSS.container}">${table}${this.menuFooterELD(ela)}</div>`
+			let container = `<div style="${CSS.container}">${html}${this.menuFooterELD(ela)}</div>`
 
 			return container;
 		}
@@ -403,7 +510,7 @@ const celebrity = (function() {
 			if(!ela){
 				return ``;
 			}
-			let container = `<div style="${CSS.spacerbarNoTop}"></div>`;
+			let container = `<div style="${CSS.spacerbar}"></div>`;
 			container += `<div style="${CSS.head}">Extended Licencing Agreement</div>`;
 			container += `<div style="${CSS.subhead}">Choose one at the end of each week</div>`;
 			//constructor Small Royal Payment
@@ -418,7 +525,7 @@ const celebrity = (function() {
 			let growthBtn = `<div style="${CSS.bold}${CSS.elaSubBlock}">d8 &#215;${this.num}</div>`;
 			let growthCmd = `!celebrity --xlicencing [[${this.num}d8]&#93; ?{Have you hired Seban?|No, |Yes,seban}`;
 			growthCmd = eCore.utility.encodeHTML(growthCmd);
-			blocks += `<a style="${CSS.btnDefault}" href="${growthCmd}"><div style="${CSS.elaBlock}">${growthTitle}${growthBtn}</div></a>`;
+			blocks += `<a style="${CSS.btnInvis}" href="${growthCmd}"><div style="${CSS.elaBlock}">${growthTitle}${growthBtn}</div></a>`;
 			container += `<div style="${CSS.elaBlockHolder}">${blocks}</div>`;
 
 			return container;
@@ -428,9 +535,12 @@ const celebrity = (function() {
 			let markets = new MarketsMenu();
 			//list options
 			let showELD = options.includes(`ela`);
+			if(!showELD){
+				showELD = options.includes(`xla`);
+			}
 			let silent = options.includes(`silent`);
 			//construct menu
-			let container = markets.menu(showELD);
+			let container = markets.menu(showELD,silent);
 			//send chat
 			eCore.chat(container,silent ? `w` : null,silent ? who : null,`noarchive`);
 		}
@@ -474,32 +584,73 @@ const celebrity = (function() {
 				return `No Change`;
 			}
 		}
+		get xlaSummary(){
+			let grow = 0;
+			let con = 0;
+			for(let i = 0;i<this.num;i++){
+				let m = this.list[i];
+				if(m.dice >= 7 && m.f > m.l && m.e > m.l){
+					grow += 1;
+				}
+				else if(m.dice >= 8){
+					grow += 1;
+				}
+				else if(m.dice <= 1){
+					con += 1;
+				}
+			}
+			return [grow,con];
+		}
 		results(){
-			let table = `<ul style="${CSS.table}">`;
-			table += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
-			table += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
-			table += `<div style="${CSS.stat}">Size</div>`;
-			table += `<div style="${CSS.stat}">E.</div>`;
-			table += `<div style="${CSS.stat}">L.</div>`;
-			table += `<div style="${CSS.stat}">F.</div>`;
-			table += `</div></li>`;
+			let html = ``;
+			html += `<div style="${CSS.title}">Market Growth</div>`;
+			let subhead = ``;
+			if(this.xlaSummary[0] > 0){
+				subhead += `${eCore.utility.numberToWords(this.xlaSummary[0])} ${this.xlaSummary[0] > 1 ? `markets`: `market`} grew`;
+				if(this.xlaSummary[1] > 0){
+					subhead += ` and ${eCore.utility.numberToWords(this.xlaSummary[1])} contracted`;
+				}
+			}
+			else if(this.xlaSummary[1] > 0){
+				subhead += `${eCore.utility.numberToWords(this.xlaSummary[1])} ${this.xlaSummary[1] > 1 ? `markets`: `market`} contracted`;
+			}
+			else{
+				subhead = `No markets changed`;
+			}
+			subhead = subhead[0].toUpperCase() + subhead.substring(1);
+			log(this.xlaSummary)
+			log(eCore.utility.numberToWords(this.xlaSummary[0]))
+			log(eCore.utility.numberToWords(this.xlaSummary[1]))
+			log(subhead)
+			html += `<div style="${CSS.subhead}">${subhead}</div>`;
+			html += `<div style="${CSS.spacerbar}"></div>`;
+			html += `<ul style="${CSS.table}">`;
+			html += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
+			html += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
+			html += `<div style="${CSS.stat}">Size</div>`;
+			html += `<div style="${CSS.stat}">E.</div>`;
+			html += `<div style="${CSS.stat}">L.</div>`;
+			html += `<div style="${CSS.stat}">F.</div>`;
+			html += `</div></li>`;
 			for(let i = 0;i<this.num;i++){
 				let m = this.list[i];
 				let resultMsg = this.roll(i);
 				log(`Market: ${m.name} | Size: ${m.size} | E:${m.e} L:${m.l} F:${m.f}`);
-				table += `<li style="${CSS.li}"><div style="${CSS.row}">`;
-				table += `<div style="${CSS.name}">${m.name}</div>`;
-				table += `<div style="${CSS.stat}">${m.size}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
-				table += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
-				table += `</div></li>`;
-				table += `<li style="${CSS.liSub}"><div style="${CSS.resultDice} ${CSS.roll(m)}">${m.dice}&nbsp;&nbsp;</div>`;
-				table += `<div style="${CSS.resultMsg}">${resultMsg}</div></li>`
+				html += `<li style="${CSS.li}"><div style="${CSS.row}">`;
+				let url = `!celebrity --marketinfo ${m.id}`;
+				url = eCore.utility.encodeHTML(url);
+				html += `<div style="${CSS.name}"><a style="${CSS.btnInvis}" href="${url}">${m.name}</a></div>`;
+				html += `<div style="${CSS.stat}">${m.size}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
+				html += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
+				html += `</div></li>`;
+				html += `<li style="${CSS.liSub}"><div style="${CSS.resultDice} ${CSS.roll(m)}">${m.dice}&nbsp;&nbsp;</div>`;
+				html += `<div style="${CSS.resultMsg}">${resultMsg}</div></li>`
 			}
-			table += `</ul>`;
+			html += `</ul>`;
 	
-			let container = `<div style="${CSS.container}">${table}</div>`
+			let container = `<div style="${CSS.container}">${html}</div>`
 
 			return container;
 		}
@@ -519,101 +670,64 @@ const celebrity = (function() {
 	}
 
 	class MarketInfo extends Market{
-		_halfEndorsement = false;
-		get halfEndorsement() {
-			return this._halfEndorsement;
-		}
-		_fullEndorsement = false;
-		get fullEndorsement() {
-			return this._fullEndorsement;
-		}
-		_halfLicencing = false;
-		get halfLicencing() {
-			return this._halfLicencing;
-		}
-		_fullLicencing = false;
-		get fullLicencing() {
-			return this._fullLicencing;
-		}
-		_halfFame = false;
-		get halfFame() {
-			return this._halfFame;
-		}
-		_fullFame = false;
-		get fullFame() {
-			return this._fullFame;
-		}
 		constructor(m){
 			super(m);
-			if(this.e >= this.em/2){
-				this._halfEndorsement = true;
-				if(this.e === this.em){
-					this._fullEndorsement = true;
-				}
-			}
-			if(this.l >= this.lm/2){
-				this._halfLicencing = true;
-				if(this.l === this.lm){
-					this._fullLicencing = true;
-				}
-			}
-			if(this.l >= this.lm/2){
-				this._halfFame = true;
-				if(this.l === this.lm){
-					this._fullFame = true;
-				}
-			}
 		}
-		thresholds(){ //continue from here
+		thresholds(){
 			let html = ``;
-			html += `<div style="${CSS.nameHeader}">Market: ${this.name}</div>`;
+			html += `<div style="${CSS.title}">Market: ${this.name}</div>`;
+			let title = Titles.analyseStatus([this]);
+			/^.+ed|^.+ial/g.test(title) ? title = `Locally ${title}` : title = `Local ${title}`;
+			html += `<div style="${CSS.subhead}">Current Status: ${title}</div>`;
+			//html += `<div style="${CSS.subhead}">Size: ${this.size}; Endorsement: ${this.e}; Licencing: ${this.l}; Fame: ${this.f}</div>`;
 			//add endorsement
 			if(this.fullEndorsement || this.halfEndorsement){
-				html += `<div>Endorsement (${this.e}/${this.em})</div>`;
+				html += `<div style="${CSS.spacerbar}"></div>`
+				html += `<div style="${CSS.headleft2}">Endorsement (${this.e}/${this.em})</div>`;
 				if(this.fullEndorsement){
-					html += `<div>Due to being at maximum</div>`
+					html += `<div style="${CSS.subheadleft2}">Due to being at maximum endorsement you gain the following:</div>`
 					for(let info of this.infoFullEndorsement){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`max`);
 					}
 				}
 				if(this.halfEndorsement){
-					html += `<div>Due to being above half</div>`
+					!this.fullEndorsement ? html += `<div style="${CSS.subheadleft2}">Due to being at or above half endorsement you gain the following:</div>` : false;
 					for(let info of this.infoHalfEndorsement){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`half`);
 					}
 				}
 			}
 			//add licencing
-			html += `<div style="${CSS.spacerbarNoTop}"></div>`
 			if(this.fullLicencing || this.halfLicencing){
-				html += `<div>Licencing (${this.l}/${this.lm})</div>`;
+				html += `<div style="${CSS.spacerbar}"></div>`
+				html += `<div style="${CSS.headleft2}">Licencing (${this.l}/${this.lm})</div>`;
 				if(this.fullLicencing){
-					html += `<div>Due to being at maximum</div>`
+					html += `<div style="${CSS.subheadleft2}">Due to being at maximum licencing you gain the following:</div>`
 					for(let info of this.infoFullLicencing){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`max`);
 					}
 				}
 				if(this.halfLicencing){
-					html += `<div>Due to being above half</div>`
+					!this.fullLicencing ? html += `<div style="${CSS.subheadleft2}">Due to being at or above half licencing you gain the following:</div>` : false;
 					for(let info of this.infoHalfLicencing){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`half`);
 					}
 				}
 			}
 			//add fame
-			html += `<div style="${CSS.spacerbarNoTop}"></div>`
 			if(this.fullFame || this.halfFame){
-				html += `<div>Fame (${this.f}/${this.fm})</div>`;
+				html += `<div style="${CSS.spacerbar}"></div>`
+				html += `<div style="${CSS.headleft2}">Fame (${this.f}/${this.fm})</div>`;
 				if(this.fullFame){
-					html += `<div>Due to being at maximum</div>`
+					html += `<div style="${CSS.subheadleft2}">Due to being at maximum fame you gain the following:</div>`
 					for(let info of this.infoFullFame){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`max`);
 					}
 				}
 				if(this.halfFame){
-					html += `<div>Due to being above half</div>`
+					!this.fullFame ? html += `<div style="${CSS.subheadleft2}">Due to being at or above half fame you gain the following:</div>` : false;
 					for(let info of this.infoHalfFame){
-						html += MarketInfo.infoConstructor(info);
+						html += MarketInfo.infoConstructor(info,`half`);
 					}
 				}
 			}
@@ -622,16 +736,22 @@ const celebrity = (function() {
 
 			return container;
 		}
-		static infoConstructor(info){
+		static infoConstructor(info,type){
 			let html = ``;
-			html += `<ul>`;
-			info.name ? html += `<li>${info.name}</li>`: false ;
-			info.benefit ? html += `<li>${info.benefit}</li>`: false ;
-			info.detriment ? html += `<li>${info.detriment}</li>`: false ;
+			html += `<ul style="${CSS.ulinfo}">`;
+			let nametitle = info.name;
+			if(!info.name.endsWith(`.`) && !info.name.endsWith(`!`) && !info.name.endsWith(`?`)){
+				nametitle += `.`;
+			}
+			info.name ? html += `<li style="${CSS.liinfo}${CSS.liname}">${nametitle}</li>`: false ;
+			info.benefit ? html += `<li style="${CSS.liinfo}${CSS.libenefit}">${CSS.liarrow(`benefit${type}`)}<span style="${CSS.litext}">${info.benefit}</span></li>`: false ;
+			info.detriment ? html += `<li style="${CSS.liinfo}${CSS.lidetriment}">${CSS.liarrow(`detriment${type}`)}<span style="${CSS.litext}">${info.detriment}</span></li>`: false ;
 			html += `</ul>`;
 			return html;
 		}
-		static view(id){
+		static view(options,who){
+			let id = options[0];
+			let silent = options.includes(`silent`);
 			//token/market from id
 			let token = findObjs({
 				_id: id,
@@ -646,7 +766,7 @@ const celebrity = (function() {
 			//construct menu
 			let container = market.thresholds();
 			//send chat
-			eCore.chat(container,null,null,`noarchive`);
+			eCore.chat(container,silent ? `w` : null,silent ? who : null,`noarchive`);
 		}
 		_infoHalfEndorsement = [{
 			"name": `Don't You Know Who I Am?`,
@@ -749,7 +869,7 @@ const celebrity = (function() {
 		if(eCore.msgCompare.adv(args,`marketinfo`)){
 			let options = [];
 			options = options.concat(eCore.msgCompare.advanced(args,`marketinfo`));
-			MarketInfo.view(options[0]);
+			MarketInfo.view(options,msg.who);
 		}
 	});
 

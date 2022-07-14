@@ -6,13 +6,16 @@ const celebrity = (function() {
 		static bold = `font-weight: bold;`;
 		static title = `font-size: 1.25em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40; margin: 0.1em 0em;`;
 		static btnInvis = `color: #000; background-color: transparent; padding: 0; border: none;`;
+		static btnLiInvis = `vertical-align: middle;color: #000; background-color: transparent; padding: 0; border: none; overflow: hidden; text-overflow: ellipsis; width:100%; margin-bottom: 1px;`;
 		static table = `font-size:12px; width: 100%; list-style: none; margin:0px; white-space: nowrap;`;
 		static li = `text-align: right;`;
 		static rowHeader = `font-size:1.2em; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
 		static row = `border-top: 1px solid #a0a0a0;`;
 		static nameHeader = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;`;
-		static name = `text-align:right; padding:2px 0px; display: inline-block; width: 60%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; margin-top:0px; font-style: italic;`;
-		static stat = `text-align:center; padding:2px 0px; display: inline-block; width: 10%; vertical-align: middle;`;
+		static name = `text-align:right; padding:2px 0px; display: inline-block; width: 62%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; margin-top:0px; font-style: italic;`;
+		static stat = `text-align:center; padding:2px 0px; display: inline-block; width: 9%; vertical-align: middle;`;
+		static statnarrow = ` width: 9%;`
+		static statwide = ` width: 11%;`
 		static container = `border:1px solid #333; background-color: #fff; padding:4px 6px 6px 6px;`;
 		static spacerbar = `display: block; margin: 4px 8px; border-bottom: 1px solid #7e2d40;`;
 		static spacerbarNoTop = `display: block; margin: 0px 8px 8px 8px; border-bottom: 1px solid #7e2d40;`;
@@ -351,7 +354,7 @@ const celebrity = (function() {
 			"tie":`Renowned Adventurers`,
 		}
 		static med = {
-			"endorsement":`Powerbrokers`,
+			"endorsement":`Power Brokers`,
 			"licencing":`Executive Adventurers`,
 			"fame":`Famed Adventurers`,
 			"tie":`Exalted Adventurers`,
@@ -483,21 +486,21 @@ const celebrity = (function() {
 			html += `<ul style="${CSS.table}">`;
 			html += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
 			html += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
-			html += `<div style="${CSS.stat}">Size</div>`;
-			html += `<div style="${CSS.stat}">E.</div>`;
-			html += `<div style="${CSS.stat}">L.</div>`;
-			html += `<div style="${CSS.stat}">F.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statwide}">Size</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">E.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">L.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">F.</div>`;
 			html += `</div></li>`;
 			for(let m of this.list){
 				log(`Market: ${m.name} | Size: ${m.size} | E:${m.e} L:${m.l} F:${m.f}`);
 				html += `<li style="${CSS.li}"><div style="${CSS.row}">`;
 				let url = `!celebrity --marketinfo ${m.id}${silent ? ` silent`:` `}`;
 				url = eCore.utility.encodeHTML(url);
-				html += `<div style="${CSS.name}"><a style="${CSS.btnInvis}" href="${url}">${m.name}</a></div>`;
-				html += `<div style="${CSS.stat}">${m.size}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
+				html += `<div style="${CSS.name}"><a style="${CSS.btnLiInvis}" href="${url}">${m.name}</a></div>`;
+				html += `<div style="${CSS.stat}${CSS.statwide}">${m.size}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
 				html += `</div></li>`;
 			}
 			html += `</ul>`;
@@ -627,10 +630,10 @@ const celebrity = (function() {
 			html += `<ul style="${CSS.table}">`;
 			html += `<li style="${CSS.li}"><div style="${CSS.rowHeader}">`;
 			html += `<div style="${CSS.nameHeader}">Market&nbsp;</div>`;
-			html += `<div style="${CSS.stat}">Size</div>`;
-			html += `<div style="${CSS.stat}">E.</div>`;
-			html += `<div style="${CSS.stat}">L.</div>`;
-			html += `<div style="${CSS.stat}">F.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statwide}">Size</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">E.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">L.</div>`;
+			html += `<div style="${CSS.stat}${CSS.statnarrow}">F.</div>`;
 			html += `</div></li>`;
 			for(let i = 0;i<this.num;i++){
 				let m = this.list[i];
@@ -639,11 +642,11 @@ const celebrity = (function() {
 				html += `<li style="${CSS.li}"><div style="${CSS.row}">`;
 				let url = `!celebrity --marketinfo ${m.id}`;
 				url = eCore.utility.encodeHTML(url);
-				html += `<div style="${CSS.name}"><a style="${CSS.btnInvis}" href="${url}">${m.name}</a></div>`;
-				html += `<div style="${CSS.stat}">${m.size}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
-				html += `<div style="${CSS.stat}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
+				html += `<div style="${CSS.name}"><a style="${CSS.btnLiInvis}" href="${url}">${m.name}</a></div>`;
+				html += `<div style="${CSS.stat}${CSS.statwide}">${m.size}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.e,m.em)}">${m.e}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.l,m.lm)}">${m.l}</div>`;
+				html += `<div style="${CSS.stat}${CSS.statnarrow}${CSS.thresholds(m.f,m.fm)}">${m.f}</div>`;
 				html += `</div></li>`;
 				html += `<li style="${CSS.liSub}"><div style="${CSS.resultDice} ${CSS.roll(m)}">${m.dice}&nbsp;&nbsp;</div>`;
 				html += `<div style="${CSS.resultMsg}">${resultMsg}</div></li>`
@@ -770,15 +773,15 @@ const celebrity = (function() {
 		}
 		_infoHalfEndorsement = [{
 			"name": `Don't You Know Who I Am?`,
-			"benefit": `It is not in the interests of your benefactors for you to languish in jail. You no longer get arrested for trivial offenses. For more serious offences you can expect any sentence you receive to be halved.`,
-			"detriment": `Roll a d20, on a 1 you lose 1 Licencing and 1 Endorsement, and on a 2 you lose 1 Endorsement as word gets out about covering for your antics.`,
+			"benefit": `Your benefactors don’t want you in jail. You no longer get arrested for trivial offenses. For more serious offences any sentence you receive is reduced by two weeks (to a minimum of half the original duration).`,
+			"detriment": `Lose 1 Endorsement, Licencing, and Fame if you are jailed. Lose 1 Endorsement for trivial offences if they become overly frequent.`,
 		}, {
 			"name": `You Come Recommended`,
-			"benefit": `While not guaranteed that all factions will welcome you all the time, being this well connected means your can get your foot in the door with the majority of businesses, institutions, and people of power and they are at least likely to grant you an audience and hear you out.`,
-			"detriment": `Word travels, any discourtesy you show someone at a meeting gained on others recommendation results in a loss of Endorsement (dependant on the exact discourtesy, insulting them vs attacking them for example).`,
+			"benefit": `You can get your foot in the door with the majority of businesses, institutions, and people of power and they are at least likely to grant you an audience and hear you out. Although it is not guaranteed.`,
+			"detriment": `Any discourtesy you show someone at a meeting gained on another's recommendation results in a loss of Endorsement.`,
 		}, {
 			"name": `Borrow the Coach`,
-			"benefit": `Routine mundane travel within the Market costs you nothing.`,
+			"benefit": `Routine mundane travel within and to the Market costs you nothing.`,
 			"detriment": `While travelling in such a fashion you will be expected to defend other travellers.`,
 		},];
 		get infoHalfEndorsement() {
@@ -786,12 +789,12 @@ const celebrity = (function() {
 		}
 		_infoFullEndorsement = [{
 			"name": `House in the Famptons`,
-			"benefit": ` You may spend a week of downtime in Luxury lifestyle being pampered at the expense of your benefactors. You gain the benefits of the Relaxation downtime activity or you may Prepare for a downtime action immediately following this one, with a duration of no more than two workweeks.<br><br>If you prepare, in the following downtime action you may reroll one d20 rolled as part of one ability check.`,
-			"detriment": `Roll a d6, on a 1 you have to spend the week doing the Side-Quest downtime activity instead.`,
+			"benefit": `You may spend a week of downtime in Luxury lifestyle being pampered at the expense of your benefactors. You gain the benefits of the Relaxation downtime activity, or you may Prepare for a downtime action of no more than two workweeks immediately following this one. If you prepare, you may reroll one d20 rolled as part of one ability check during the following downtime action.`,
+			"detriment": `Roll a d6. On a 1 you have to spend this week doing the Side-Quest downtime activity instead and do not benefit from House in the Famptons.`,
 		}, {
 			"name": `Arcane Support`,
-			"benefit": `Once per day, you may request the casting of a spell of any level up to half the Market Size +1 (rounded up) from a contact, provided you provide half the cost of any material components.`,
-			"detriment": `They will only do so while it remains in their interest, and they know the reasons for doing so.`,
+			"benefit": `Once per day, you may request the casting of a spell of any level up to half the Market Size +1 (rounded up, to a maximum of level 5) from a contact, provided you provide half the cost of any material components.`,
+			"detriment": `They will only do so while it remains in their interest, and they are aware of the reasons for doing so.`,
 		}, {
 			"name": `Call in Markers`,
 			"benefit": `You gain either d8 Fame or Licencing in the Market (your choice).`,
@@ -802,41 +805,41 @@ const celebrity = (function() {
 		}
 		_infoHalfLicencing = [{
 			"name": `Brand Recognition`,
-			"benefit": `All business you own in the region may add the Market Size to their profit roll.`,
+			"benefit": `Business you own may add the Market Size to their profit roll.`,
+			"detriment": ``,
+		},{
+			"name": `Tributary of Trade`,
+			"benefit": `Neighbouring regions will not prevent your passage through their lands without good reason.`,
 			"detriment": ``,
 		},];
 		get infoHalfLicencing() {
 			return this._infoHalfLicencing;
 		}
 		_infoFullLicencing = [{
-			"name": `Free Swag`,
+			"name": `Swag`,
 			"benefit": `You gain a 50% discount on all personal non-magical equipment and gear.`,
 			"detriment": ``,
+		},{
+			"name": `Penthouse Suite`,
+			"benefit": `Gain a 50% discount on maintaining a luxury lifestyle.`,
+			"detriment": `Paying for a lifestyle of comfortable or below may result in a loss of status.`,
 		},];
 		get infoFullLicencing() {
 			return this._infoFullLicencing;
 		}
 		_infoHalfFame = [{
 			"name": `On the House`,
-			"benefit": `You no longer need to pay for basic Ale (or similar) in taverns and inns as long as there are people to buy them for you.`,
-			"detriment": `While benefiting in this manner, fans will hang on your every word, not much you say will stay private.`,
+			"benefit": `You no longer need to pay for basic drinks in taverns and inns if there are people to buy them for you.`,
+			"detriment": `While benefiting like this, fans will hang on your every word, not much will stay private.`,
 		}, {
 			"name": `Spare Room`,
-			"benefit": `You can find lodging and food of Poor standard for your band for free at short notice, as you lodge at a fans house.`,
-			"detriment": `You may be expected to regale them with a tale, defend them from attack, or perhaps have awkward conversations about personal space.`,
-		}, {
-			"name": `A Fan Gave Me This`,
-			"benefit": `Once per day, you may produce a non-magical item worth up to 1 GP that a fan could have conceivable given to you previously.`,
-			"detriment": `When you use the item, roll a d20. On a 1 it was actually sent from a Rival or detractor and fails turning into an annoying but harmless prank.`,
+			"benefit": `You can find lodging and food of Poor standard for your band for free at short notice, by lodging with fans.`,
+			"detriment": `Your hosts are certain to not give you much space.`,
 		},];
 		get infoHalfFame() {
 			return this._infoHalfFame;
 		}
 		_infoFullFame = [{
-			"name": `Would You Kindly`,
-			"benefit": `Once per day, whenever travelling in a suitable area you may summon up to your Charisma modifier + d4 Commoners from a suitable gathering of fans to carry out basic tasks for you.`,
-			"detriment": `Your fans are relentless in looking for you. Attempts to hide your identity or evade them are at disadvantage as they relentless track you down.`,
-		}, {
 			"name": `Fan Mob`,
 			"benefit": `You may rally a group of diehard supporters. The number of fans is proportionate to the population of the location you are in, in a city this might be several hundred, in a small village it might be two.`,
 			"detriment": `Spend 1 Fame from your local Market to use.`,
@@ -844,6 +847,10 @@ const celebrity = (function() {
 			"name": `Shelter`,
 			"benefit": `A group of diehard, devoted fans, take you in and shelter you. They will shield you from the law or anyone else searching for you, risking their lives as necessary. While there you gain the benefit of a Poor lifestyle.`,
 			"detriment": `Spend 1 Fame per day from your local Market to use.`,
+		},{
+			"name": `There they are!`,
+			"benefit": ``,
+			"detriment": `Attempts to hide your identity or evade detection in public are at disadvantage as fans track you down relentless.`,
 		},];
 		get infoFullFame() {
 			return this._infoFullFame;

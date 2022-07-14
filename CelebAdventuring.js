@@ -772,16 +772,12 @@ const celebrity = (function() {
 			eCore.chat(container,silent ? `w` : null,silent ? who : null,`noarchive`);
 		}
 		_infoHalfEndorsement = [{
-			"name": `Don't You Know Who I Am?`,
-			"benefit": `Your benefactors don’t want you in jail. You no longer get arrested for trivial offenses. For more serious offences any sentence you receive is reduced by two weeks (to a minimum of half the original duration).`,
-			"detriment": `Lose 1 Endorsement, Licencing, and Fame if you are jailed. Lose 1 Endorsement for trivial offences if they become overly frequent.`,
-		}, {
 			"name": `You Come Recommended`,
 			"benefit": `You can get your foot in the door with the majority of businesses, institutions, and people of power and they are at least likely to grant you an audience and hear you out. Although it is not guaranteed.`,
 			"detriment": `Any discourtesy you show someone at a meeting gained on another's recommendation results in a loss of Endorsement.`,
 		}, {
 			"name": `Borrow the Coach`,
-			"benefit": `Routine mundane travel within and to the Market costs you nothing.`,
+			"benefit": `Routine mundane travel within the Market costs you nothing.`,
 			"detriment": `While travelling in such a fashion you will be expected to defend other travellers.`,
 		},];
 		get infoHalfEndorsement() {
@@ -795,10 +791,6 @@ const celebrity = (function() {
 			"name": `Arcane Support`,
 			"benefit": `Once per day, you may request the casting of a spell of any level up to half the Market Size +1 (rounded up, to a maximum of level 5) from a contact, provided you provide half the cost of any material components.`,
 			"detriment": `They will only do so while it remains in their interest, and they are aware of the reasons for doing so.`,
-		}, {
-			"name": `Call in Markers`,
-			"benefit": `You gain either d8 Fame or Licencing in the Market (your choice).`,
-			"detriment": `You lose the same amount plus two Endorsement. Overuse may result in diminishing returns.`,
 		},];
 		get infoFullEndorsement() {
 			return this._infoFullEndorsement;
@@ -808,45 +800,45 @@ const celebrity = (function() {
 			"benefit": `Business you own may add the Market Size to their profit roll.`,
 			"detriment": ``,
 		},{
-			"name": `Tributary of Trade`,
-			"benefit": `Neighbouring regions will not prevent your passage through their lands without good reason.`,
+			"name": `Swag`,
+			"benefit": `You gain a 20% discount on all personal non-magical equipment and gear.`,
 			"detriment": ``,
 		},];
 		get infoHalfLicencing() {
 			return this._infoHalfLicencing;
 		}
 		_infoFullLicencing = [{
-			"name": `Swag`,
-			"benefit": `You gain a 50% discount on all personal non-magical equipment and gear.`,
-			"detriment": ``,
+			"name": `Economic Leverage`,
+			"benefit": `You gain either d8 Fame or Endorsement in the Market (your choice).`,
+			"detriment": `You lose the same amount plus two Licencing. Overuse may result in diminishing returns.`,
 		},{
 			"name": `Penthouse Suite`,
 			"benefit": `Gain a 50% discount on maintaining a luxury lifestyle.`,
-			"detriment": `Paying for a lifestyle of comfortable or below may result in a loss of status.`,
+			"detriment": `Paying for a lifestyle of comfortable or below may result in a loss of Fame.`,
 		},];
 		get infoFullLicencing() {
 			return this._infoFullLicencing;
 		}
 		_infoHalfFame = [{
 			"name": `On the House`,
-			"benefit": `You no longer need to pay for basic drinks in taverns and inns if there are people to buy them for you.`,
-			"detriment": `While benefiting like this, fans will hang on your every word, not much will stay private.`,
+			"benefit": `You no longer need to pay for basic drinks in taverns and inns if there are people to buy them for you. You may also lodge with fans for free as if benefitting from a Modest lifestyle.`,
+			"detriment": `The fans are relentless. While benefiting you will not have much privacy.`,
 		}, {
-			"name": `Spare Room`,
-			"benefit": `You can find lodging and food of Poor standard for your band for free at short notice, by lodging with fans.`,
-			"detriment": `Your hosts are certain to not give you much space.`,
+			"name": `Shelter`,
+			"benefit": `A group of diehard, devoted fans, take you in and shelter you. They will shield you from the law or anyone else searching for you, risking their lives as necessary. While there you gain the benefit of a Poor lifestyle.`,
+			"detriment": `Spend 1 Fame per day from your local Market to use.`,
 		},];
 		get infoHalfFame() {
 			return this._infoHalfFame;
 		}
 		_infoFullFame = [{
 			"name": `Fan Mob`,
-			"benefit": `You may rally a group of diehard supporters. The number of fans is proportionate to the population of the location you are in, in a city this might be several hundred, in a small village it might be two.`,
+			"benefit": `You may rally a group of diehard supporters suitable for the current location. Your band gains a point of Inspiration when they fans appears which can only be spent when within sight and hearing of them. If not used by the time the mob disperses it is lost.`,
 			"detriment": `Spend 1 Fame from your local Market to use.`,
 		}, {
-			"name": `Shelter`,
-			"benefit": `A group of diehard, devoted fans, take you in and shelter you. They will shield you from the law or anyone else searching for you, risking their lives as necessary. While there you gain the benefit of a Poor lifestyle.`,
-			"detriment": `Spend 1 Fame per day from your local Market to use.`,
+			"name": `Would You Kindly`,
+			"benefit": `Dedicated fans are considered Charmed by you. Ignoring racial abilities that would prevent this.`,
+			"detriment": ``,
 		},{
 			"name": `There they are!`,
 			"benefit": ``,

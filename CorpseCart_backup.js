@@ -1,47 +1,114 @@
+/*
+CORPSE CART
+v0.02
+Release Notes
+- tag now tags the map
+- del now deletes from the map layer
+- excess logging removed
+*/
 on("ready",function(){  
-	
-	//const CorpseMarker = 'dead';
+
+	//commands
+	const comMap = "map";
+	const comMapAlias = ["map","bury","dig"];
+	const comDel = "del";
+	const comDelAlias = ["del","remove","rem","delete"];
+	const flagTagDeadAlias = ["tag","look","find","search","flag"]
+	const corpseMarker = "status_dead";
+	const hpbarNum = "bar1_value";
 
 	//CHAT HANDLER
 	on("chat:message",function(msg){
 		if(msg.type==="api" && msg.content.toLowerCase().indexOf("!corpsecart")==0 && playerIsGM(msg.playerid)){
 			log("CC Msg Seen");
-			let args = msg.content.split(" ");
+			
+			let args = msg.content.toLowerCase().split(/\s+/);
 			args.shift();
+			
+			if (args == undefined || args.length == 0){
+				return;
+			}
+			
+			var corpseCom = args[0];
+			
+			var flagTagDead = false;
+			args.some(arg => flagTagDeadAlias.includes(arg)) ? flagTagDead = true : false ;
+			
+			comMapAlias.includes(corpseCom) ? corpseCom = comMap : false ;
+			comDelAlias.includes(corpseCom) ? corpseCom = comDel : false ;
+			
 			var player = getObj("player", msg.playerid);
 			var mapID = player.get("_lastpage");
-			var map = getObj("page", mapID);
-			args.includes("del") || args.includes("map") ? findCorpses(msg.playerid,args) : false;
+			
+			flagTagDead == true ? tagDead(mapID) : false ;
+						
+			switch(corpseCom){
+				case comMap:
+					findCorpses(mapID,corpseCom)
+					break;
+				case comDel:
+					findCorpses(mapID,corpseCom)
+					break;
+				default:
+					return;
+			}
+			
 		}
 	});
-
-	//ON REQUEST FIND DEAD
-	on("chat:message",function(msg){
-		if(msg.type==="api" && msg.content.indexOf("!corpseCart")==0 && playerIsGM(msg.playerid)){
-			findCorpses(msg.playerid);
-        }
-    });
 	
-	//FIND CORPSES TO DEL OR MAP
-	function findCorpses(GMid,args){
-		let player = getObj("player", GMid);
-		let GMmapID = player.get("_lastpage");
-        var corpsetokensall = findObjs({
+	//FIND CORPSES WHO DON'T REALISE IT
+	function tagDead(mapID){
+        var untaggedTokens = findObjs({
             _type:"graphic",
-			_subtype: 'token',
-			status_dead : !false,
-			//layer: 'objects',
-            _pageid:GMmapID
+			_subtype: "token",
+			status_dead : false,
+			layer: "objects",
+            _pageid: mapID,
         });
-		var corpsetokens = corpsetokensall.filter(t => getObj('character',t.get('represents')).get('controlledby') == "");
+		
+		let untaggedTokensMap = findObjs({
+            _type:"graphic",
+			_subtype: "token",
+			status_dead : false,
+			layer: "map",
+            _pageid: mapID,
+		});
+		untaggedTokens = untaggedTokens.concat(untaggedTokensMap);
+		untaggedTokens = untaggedTokens.filter(t => t.get('represents') !== "");
+		untaggedTokens = untaggedTokens.filter(t => getObj('character',t.get('represents')).get('controlledby') == "");		
+		untaggedTokens = untaggedTokens.filter(t => parseInt(t.get(hpbarNum)) <= 0);
+		untaggedTokens.forEach(utCorpse => utCorpse.set(corpseMarker, true));
+    }
+
+	//FIND CORPSES TO DEL OR MAP
+	function findCorpses(mapID,corpseCom){
+        var corpseTokens = findObjs({
+            _type:"graphic",
+			_subtype: "token",
+			status_dead : true,
+			layer: "objects",
+            _pageid: mapID,
+        });
+		
+		if (corpseCom==comDel){
+			let corpseTokensMap = findObjs({
+				_type:"graphic",
+				_subtype: "token",
+				status_dead : true,
+				layer: "map",
+				_pageid: mapID,
+			});
+			corpseTokens = corpseTokens.concat(corpseTokensMap);
+		}
+		corpseTokens = corpseTokens.filter(t => t.get('represents') !== "");
+		corpsetokens = corpseTokens.filter(t => getObj('character',t.get('represents')).get('controlledby') == "");
         if (corpsetokens===undefined || corpsetokens.length == 0){
             sendChat("Corpse Cart", "/w gm No corpses found to cart.",null,{noarchive:true})
             return;
         }
 		else{
-			log("Number of Corpses to Cart: "+corpsetokens.length);
-			args.includes("del") ? corpsetokens.forEach(deleteCorpses) : false;
-			args.includes("map") ? corpsetokens.forEach(buryCorpses) : false;
+			corpseCom == comDel ? corpsetokens.forEach(deleteCorpses) : false;
+			corpseCom == comMap ? corpsetokens.forEach(buryCorpses) : false;
 			sendChat("Corpse Cart", "/w gm Carted away " + corpsetokens.length + " corpses.",null,{noarchive:true})
 		}
     }
@@ -57,4 +124,6 @@ on("ready",function(){
 		log("Burying away: "+getObj('character',body.get('represents')).get('name'));
 		body.set({layer:"map",tint_color:"000000"});
 	}
+	
+	
 });

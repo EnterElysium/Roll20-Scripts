@@ -4,7 +4,7 @@ const celebrity = (function() {
 
 	class CSS{
 		static bold = `font-weight: bold;`;
-		static title = `font-size: 1.25em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40; margin: 0.1em 0em;`;
+		static title = `font-size: 1.3em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40; margin: 0.1em 0em;`;
 		static btnInvis = `color: #000; background-color: transparent; padding: 0; border: none;`;
 		static btnLiInvis = `vertical-align: middle;color: #000; background-color: transparent; padding: 0; border: none; overflow: hidden; text-overflow: ellipsis; width:100%; margin-bottom: 1px;`;
 		static table = `font-size:12px; width: 100%; list-style: none; margin:0px; white-space: nowrap;`;
@@ -20,12 +20,12 @@ const celebrity = (function() {
 		static spacerbar = `display: block; margin: 4px 8px; border-bottom: 1px solid #7e2d40;`;
 		static spacerbarNoTop = `display: block; margin: 0px 8px 8px 8px; border-bottom: 1px solid #7e2d40;`;
 		static spacerbarNoBottom = `display: block; margin: 8px 8px 0px 8px; border-top: 1px solid #7e2d40;`;
-		static head = `text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
-		static subhead = `text-align: center; display: block; font-style: italic; color: #a0a0a0; font-size: 0.7em; line-height: 1.15em;`;
+		static head = `font-size: 1.1em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
+		static subhead = `text-align: center; display: block; font-style: italic; color: #a0a0a0; font-size: 0.8em; line-height: 1.1em;`;
 		static elaBlockHolder = `text-align: center; display: block; font-size: 12px; margin-top:4px;`;
 		static elaBlock = `text-align: center; display: inline-block; vertical-align: middle; padding: 4px;`;
 		static elaSubBlock = `text-align: center; vertical-align: middle;`;
-		static elaSmallText = `font-size: 0.8em; line-height: 1em;`;
+		static elaSmallText = `font-size: 0.9em; line-height: 1em;`;
 		static liSub = `text-align: right; background-color: #f1f1f1; padding: 0px 3px; text-align: left;`;
 		static resultDice = `width: 8%; display: inline-block; text-align: right; vertical-align: middle; font-weight: bold;`;
 		static resultMsg = `width: 92%; display: inline-block; text-align: left; white-space: normal; vertical-align: middle; font-size: 0.9em; line-height: 1em; vertical-align: middle; padding: 0.3em 0px;`;
@@ -33,8 +33,8 @@ const celebrity = (function() {
 		static diceFail = `color: darkred;`;
 		static diceNothing = ``;
 		static headleft2 = `display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40;`;
-		static subheadleft2 = `display: block; font-style: italic; color: #a0a0a0; font-size: 0.7em; line-height: 1.1em;`;
-		static ulinfo = `font-size:11px; list-style: none; margin: 0;`;
+		static subheadleft2 = `display: block; font-style: italic; color: #a0a0a0; font-size: 0.8em; line-height: 1.05em;`;
+		static ulinfo = `font-size:12px; list-style: none; margin: 0;`;
 		static liinfo = `line-height: 1.15em;`;
 		static liname = `font-weight: bold; font-style: italic; margin: 6px 0px 0px 0px; padding: 1px 4px; border-bottom: 1px solid #a0a0a0;`;
 		static libenefit = `text-align: justify; text-justify: inter-word; padding: 6px 3px 0px 3px;`;
@@ -772,7 +772,7 @@ const celebrity = (function() {
 			eCore.chat(container,silent ? `w` : null,silent ? who : null,`noarchive`);
 		}
 		_infoHalfEndorsement = [{
-			"name": `You Come Recommended`,
+			"name": `Hello, My Name Is...`,
 			"benefit": `You can get your foot in the door with the majority of businesses, institutions, and people of power and they are at least likely to grant you an audience and hear you out. Although it is not guaranteed.`,
 			"detriment": `Any discourtesy you show someone at a meeting gained on another's recommendation results in a loss of Endorsement.`,
 		}, {

@@ -8,6 +8,10 @@ const ObjInspector = (function() {
             log(args);
             switch(args[1]){
                 //send crit override to player
+                case "represents":
+                    log("HELLO")
+                    represents(...args.slice(2));
+                    break;
                 case "repAttr":
                     repAttr(...args.slice(2));
                     break;
@@ -24,6 +28,13 @@ const ObjInspector = (function() {
             }
         }
     });
+
+    function represents(id){
+        let token = getObj('graphic', id);
+        log(token.get("represents"));
+        getObj('character',obj.get('represents')).get('controlledby')
+
+    }
 	
     function misc(type,id){
         let objToInspect = getObj(type,id);

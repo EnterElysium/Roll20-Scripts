@@ -70,7 +70,7 @@ const corpsecart = (function() {
 
 	function msgConstructor(txt,icon=`bin`,ids=false){
 		let html = ``
-		html += `<div style="${CSS.container}">`
+		html += `<div class="whohidder" style="${CSS.container}">`
 		html += ids ? `<a style="${CSS.btnInvis}" href="!corpsecart undo ${String(ids)}">` : `` ;
 		html += CSS.icon(icon)
 		html += `<span style="${CSS.text}">`

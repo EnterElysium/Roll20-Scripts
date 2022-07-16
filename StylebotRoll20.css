@@ -1899,3 +1899,8 @@ div.userscript-CritOverrideSendInner a[href^="!"]:hover {
   text-shadow: 0px 0px 3px #ce0f69;
   overflow: visible;
 }
+
+/*whohidder for scripts that hide the who brought back down*/
+.userscript-whohidder{
+  margin: unset;
+}

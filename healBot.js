@@ -1,6 +1,6 @@
 const healBot = (function() {	
 
-	const scriptIndex = {"name":"healBot","version":"v0.01",};
+	const scriptIndex = {"name":"healBot","version":"v0.02",};
 
 	// format text message feedback to look pretty
 

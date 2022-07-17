@@ -3,6 +3,13 @@ const eCore = (function() {
 	const scriptIndex = {
 		"name":"eCore",
 		"version":"v0.01",
+		"msg":{
+			"process":processBasic,
+			"processAdv":processAdv,
+			"args":argsBasic,
+			"argsAdv":argsAdv,
+			"compareAdv":argsAdvCompare,
+		},
 		"msgProcess":{
 			"basic":processBasic,
 			"advanced":processAdv,
@@ -41,6 +48,52 @@ const eCore = (function() {
 			"extract":extractDice,
 		},
 		"chat":chat,
+		"get":{
+			"character":getCharacter,
+		},
+		"language":{
+			"capitalise":{
+				"firstOfString":capFirstLetterOfString,
+				"first":capFirstLetterOfString,
+			},
+		},
+	};
+
+	//Language
+	function capFirstLetterOfString(str){
+		return str[0].toUpperCase() + str.substring(1);
+	}
+
+	//Roll20 simplifiers
+	/** idtype is a string that is either character or token, otherwise leave blank
+	@param {string} idtype 
+	@param {string|Object} thing 
+	@return {object|false}*/
+	function getCharacter(thing,idtype=false){
+		if(typeof thing === "object"){
+			if(typeof thing.get === "function"){
+				thing = thing.get("represents")
+				idtype = `character`
+			}
+			else{
+				thing = thing["represents"]
+				idtype = `character`
+			}
+		}
+		if(idtype !== false && typeof thing === "string"){
+			if(idtype === "token"){
+				thing = getObj('graphic',thing)
+				if(!thing || typeof thing.get !== "function"){
+					return false;
+				}
+				thing = thing.get('represents')
+				idtype = `character`
+			}
+			if(idtype === `character`){
+				if(!thing){return false};
+				return getObj('character',thing);
+			}
+		}
 	};
 
 	//API CHAT HANDLER

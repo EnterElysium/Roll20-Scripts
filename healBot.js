@@ -173,7 +173,7 @@ const healBot = (function() {
 		})[0];
 		let character = getObj('character', token.get("represents"));
 
-		if(StreamInfo.apiIDs().includes(character.id)){
+		if(typeof StreamInfo != "undefined" && StreamInfo != null && StreamInfo.apiIDs().includes(character.id)){
 			healCharacter(msg,character.id,healAmount);
 		}
 		else{

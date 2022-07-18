@@ -1,16 +1,6 @@
 const tempHPmanager = (function() {	
 
 	const scriptIndex = {"name":"tempHPmanager","version":"v0.01",};
-	//StreamInfo flag
-	var useStreamInfo = false;
-	on("ready", function() {
-		if(typeof StreamInfo == "undefined" || StreamInfo === null){
-			useStreamInfo = false;
-		}
-		else{
-			useStreamInfo = true;
-		}
-	});
 
 	const barNumHP = 1;
 	const barNumTHP = 3;
@@ -35,7 +25,7 @@ const tempHPmanager = (function() {
 			let refund = temp - newtemp;
 			let newhp = hp + refund;
 			//streaminfo interval//
-			if(!!useStreamInfo && StreamInfo.apiIDs().includes(obj.get('represents'))){
+			if(useStreamInfo() && StreamInfo.apiIDs().includes(obj.get('represents'))){
 				//set the old and new hps
 				let cloneNewHP = findObjs({
 					_characterid: obj.get('represents'),
@@ -68,8 +58,17 @@ const tempHPmanager = (function() {
 		THPmanager.check(obj,prev);
 	});
 
+	//StreamInfo compatibility check
+	function useStreamInfo(){
+		if(typeof StreamInfo == "undefined" || StreamInfo === null){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
     function toStreamInfo(cloneNewHP=0,cloneOldHP=0,cloneNewTempHP=0,cloneOldTempHP=0){
-		if (!!useStreamInfo){
+		if (useStreamInfo()){
 			StreamInfo.apiHPandTemp(cloneNewHP,cloneOldHP,cloneNewTempHP,cloneOldTempHP);
 		}
 	};

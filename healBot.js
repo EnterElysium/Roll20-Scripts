@@ -2,19 +2,6 @@ const healBot = (function() {
 
 	const scriptIndex = {"name":"healBot","version":"v0.02",};
 
-	//StreamInfo flag
-	var useStreamInfo = false;
-	on("ready", function() {
-		if(typeof StreamInfo == "undefined" || StreamInfo === null){
-			useStreamInfo = false;
-		}
-		else{
-			useStreamInfo = true;
-		}
-	});
-
-	// format text message feedback to look pretty
-
 	on("chat:message", function(msg) {
 
 		let healTarget = false;
@@ -184,7 +171,7 @@ const healBot = (function() {
 		})[0];
 		let character = getObj('character', token.get("represents"));
 
-		if(!!useStreamInfo && StreamInfo.apiIDs().includes(character.id)){
+		if(useStreamInfo() && StreamInfo.apiIDs().includes(character.id)){
 			healCharacter(msg,character.id,healAmount);
 			return;
 		}
@@ -285,8 +272,18 @@ const healBot = (function() {
         sendChat(spkAs,msgContents,null,options);
     };
 
+
+	//StreamInfo compatibility check
+	function useStreamInfo(){
+		if(typeof StreamInfo == "undefined" || StreamInfo === null){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
 	function toStreamInfo(cloneOld,healAmount){
-		if (!!useStreamInfo){
+		if (useStreamInfo()){
 			let cloneNew = JSON.parse(JSON.stringify(cloneOld));
 			cloneNew.current = parseInt(cloneNew.current,10) + parseInt(healAmount,10);
 			StreamInfo.apiHP(cloneNew,cloneOld);

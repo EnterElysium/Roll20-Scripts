@@ -3,13 +3,14 @@ const celebrity = (function() {
 	const scriptIndex = {"name":"CelebrityAdventuring","version":"v0.01",};
 
 	//eCore required
-	var eCoreDetected = false;
-	on("ready", function() {
-		if(typeof eCore == "undefined" || eCore === null){eCoreDetected = false;}
-		else{eCoreDetected = true;}
-	});
 	function eCoreValid(){
-		if(!eCoreDetected){throw new Error(`${scriptIndex.name} ${scriptIndex.version} requires eCore library script`)}
+		if(typeof eCore == "undefined" || eCore === null){
+			log(`${scriptIndex.name} ${scriptIndex.version} failed. Could not find eCore library script (required dependency)`)
+			return false;
+		}
+		else{
+			return true;
+		}
 	}
 
 	class CSS{
@@ -860,7 +861,7 @@ const celebrity = (function() {
 	}
 
 	on("chat:message", function(msg) {
-		eCoreValid()
+		if(!eCoreValid()){return}
 		let args = eCore.msgProcess.adv(msg,`celebrity`);
 		if(!args){
 			return;

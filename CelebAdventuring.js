@@ -2,6 +2,16 @@ const celebrity = (function() {
 
 	const scriptIndex = {"name":"CelebrityAdventuring","version":"v0.01",};
 
+	//eCore required
+	var eCoreDetected = false;
+	on("ready", function() {
+		if(typeof eCore == "undefined" || eCore === null){eCoreDetected = false;}
+		else{eCoreDetected = true;}
+	});
+	function eCoreValid(){
+		if(!eCoreDetected){throw new Error(`${scriptIndex.name} ${scriptIndex.version} requires eCore library script`)}
+	}
+
 	class CSS{
 		static bold = `font-weight: bold;`;
 		static title = `font-size: 1.3em; text-align: center; display: block; font-family: 'Times New Roman', Times, serif; font-variant: small-caps; color: #7e2d40; margin: 0.1em 0em;`;
@@ -850,6 +860,7 @@ const celebrity = (function() {
 	}
 
 	on("chat:message", function(msg) {
+		eCoreValid()
 		let args = eCore.msgProcess.adv(msg,`celebrity`);
 		if(!args){
 			return;

@@ -2,6 +2,17 @@ const healBot = (function() {
 
 	const scriptIndex = {"name":"healBot","version":"v0.02",};
 
+	//StreamInfo flag
+	var useStreamInfo = false;
+	on("ready", function() {
+		if(typeof StreamInfo == "undefined" || StreamInfo === null){
+			useStreamInfo = false;
+		}
+		else{
+			useStreamInfo = true;
+		}
+	});
+
 	// format text message feedback to look pretty
 
 	on("chat:message", function(msg) {
@@ -173,26 +184,25 @@ const healBot = (function() {
 		})[0];
 		let character = getObj('character', token.get("represents"));
 
-		if(typeof StreamInfo != "undefined" && StreamInfo != null && StreamInfo.apiIDs().includes(character.id)){
+		if(!!useStreamInfo && StreamInfo.apiIDs().includes(character.id)){
 			healCharacter(msg,character.id,healAmount);
+			return;
 		}
-		else{
-			let hpCur = parseInt(token.get("bar1_value"));
-			let hpMax = parseInt(token.get("bar1_max"));
+		let hpCur = parseInt(token.get("bar1_value"));
+		let hpMax = parseInt(token.get("bar1_max"));
 
-			hpCur = Math.min(hpCur+healAmount,hpMax);
+		hpCur = Math.min(hpCur+healAmount,hpMax);
 
-			token.set("bar1_value",hpCur);
-			spawnFx(token.get('left'),token.get('top'),'burn-holy') 
+		token.set("bar1_value",hpCur);
+		spawnFx(token.get('left'),token.get('top'),'burn-holy') 
 
-			//&{template:traits} {{source=name}} {{name=rname}} {{description=description}}
+		//&{template:traits} {{source=name}} {{name=rname}} {{description=description}}
 
-			let msgYouDidHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>You healed ${character.get("name")} for ${healAmount} Hit Points.</i>}}`
-			chatter(null,"w",msg.who,msgYouDidHeals,null,"{noarchive:true}");
+		let msgYouDidHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>You healed ${character.get("name")} for ${healAmount} Hit Points.</i>}}`
+		chatter(null,"w",msg.who,msgYouDidHeals,null,"{noarchive:true}");
 
-			let msgYouGotHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>${character.get("name")} was healed for ${healAmount} Hit Points.</i>}}`
-			chatter(null,"w",["character",character],msgYouGotHeals,null,"{noarchive:true}");
-		}
+		let msgYouGotHeals = `&{template:traits} {{source=<span style="font-family: 'Times New Roman', Times, serif; text-fransform: capitalize; font-variant: small-caps; color: #7e2d40;">Character Healed</span>}} {{description=<i>${character.get("name")} was healed for ${healAmount} Hit Points.</i>}}`
+		chatter(null,"w",["character",character],msgYouGotHeals,null,"{noarchive:true}");
 	};
 
 	//get character from just their name
@@ -276,10 +286,7 @@ const healBot = (function() {
     };
 
 	function toStreamInfo(cloneOld,healAmount){
-		if (typeof StreamInfo == "undefined" || StreamInfo === null){
-			logger(`StreamInfo script not detected, unable to alter overlay from ${scriptIndex.name}`);
-		}
-		else{
+		if (!!useStreamInfo){
 			let cloneNew = JSON.parse(JSON.stringify(cloneOld));
 			cloneNew.current = parseInt(cloneNew.current,10) + parseInt(healAmount,10);
 			StreamInfo.apiHP(cloneNew,cloneOld);

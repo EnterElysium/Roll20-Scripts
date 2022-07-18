@@ -1,6 +1,16 @@
 const tempHPmanager = (function() {	
 
 	const scriptIndex = {"name":"tempHPmanager","version":"v0.01",};
+	//StreamInfo flag
+	var useStreamInfo = false;
+	on("ready", function() {
+		if(typeof StreamInfo == "undefined" || StreamInfo === null){
+			useStreamInfo = false;
+		}
+		else{
+			useStreamInfo = true;
+		}
+	});
 
 	const barNumHP = 1;
 	const barNumTHP = 3;
@@ -25,7 +35,7 @@ const tempHPmanager = (function() {
 			let refund = temp - newtemp;
 			let newhp = hp + refund;
 			//streaminfo interval//
-			if(typeof StreamInfo != "undefined" && StreamInfo !== null && typeof obj.get === "function" && StreamInfo.apiIDs().includes(obj.get('represents'))){
+			if(!!useStreamInfo && StreamInfo.apiIDs().includes(obj.get('represents'))){
 				//set the old and new hps
 				let cloneNewHP = findObjs({
 					_characterid: obj.get('represents'),
@@ -59,10 +69,7 @@ const tempHPmanager = (function() {
 	});
 
     function toStreamInfo(cloneNewHP=0,cloneOldHP=0,cloneNewTempHP=0,cloneOldTempHP=0){
-		if (typeof StreamInfo == "undefined" || StreamInfo === null){
-			logger(`StreamInfo script not detected, unable to alter overlay from TempHP`);
-		}
-		else{
+		if (!!useStreamInfo){
 			StreamInfo.apiHPandTemp(cloneNewHP,cloneOldHP,cloneNewTempHP,cloneOldTempHP);
 		}
 	};

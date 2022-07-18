@@ -1,6 +1,17 @@
 const macromover = (function() {	
 
 	const scriptIndex = {"name":"MacroMover","version":"v0.02",};
+
+	//eCore required
+	var eCoreDetected = false;
+	on("ready", function() {
+		if(typeof eCore == "undefined" || eCore === null){eCoreDetected = false;}
+		else{eCoreDetected = true;}
+	});
+	function eCoreValid(){
+		if(!eCoreDetected){throw new Error(`${scriptIndex.name} ${scriptIndex.version} requires eCore library script`)}
+	}
+
     const autoUpdate = true;
     const dupeRemoval = true;
 
@@ -185,6 +196,7 @@ const macromover = (function() {
 	}
 
 	on("chat:message",function(msg){
+		eCoreValid()
 		let cmds = eCore.msgProcess.basic(msg,`macromover`)
         let cmd = cmds[0]
         let opt = cmds[1]
@@ -199,6 +211,7 @@ const macromover = (function() {
 	});
 
 	on("change:macro",function(macro){
+		eCoreValid()
         //don't act on API hearbeat
         if(macro.get("action").startsWith(`!api-heartbeat`)){
         }

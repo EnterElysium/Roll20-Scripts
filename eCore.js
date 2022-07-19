@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const eCore = (function() {	
 
 	const scriptIndex = {
@@ -51,6 +52,12 @@ const eCore = (function() {
 		"get":{
 			"character":getCharacter,
 		},
+		"repeating":{
+			"sections":sections,
+			"byPrefix":getRepeatingSectionAttrs,
+			"mapRepeating":mapRepeating,
+			"all":allRepeating,
+		},
 		"language":{
 			"capitalise":{
 				"firstOfString":capFirstLetterOfString,
@@ -58,6 +65,114 @@ const eCore = (function() {
 			},
 		},
 	};
+
+	//Repeating
+	/**get specific repeating skill for id and prefix */
+	function allRepeating(id){
+		let sectionList = sections(id)
+		let rObjsAll = []
+		_.each(sectionList,function(s){
+			let [repRowIDs,repAttrs] = getRepeatingSectionAttrs(id,s)
+			let repAttrsArray = objToArray(repAttrs)
+			rObjsAll.push(mapRepeating(repRowIDs,repAttrsArray))
+		})
+		return rObjsAll;
+	}
+	function objToArray(obj){
+		let array = []
+		for (const key of Object.keys(obj)) {
+			array.push(key, obj[key]);
+		}
+		return array;
+	}
+	/**given an array of repeating row ids and an array of repeating attributes will return them as useful objects */
+	function mapRepeating(repRowIDs,repAttrs){
+		let rObjs = [];
+		//for each row id
+		_.each(repRowIDs,function(rowID){
+			//fitler for the bits of repeats that share the row ids
+			log(repAttrs)
+			let repAttr = repAttrs.filter(a => a.name.indexOf(rowID) > -1)
+			let repNameField = ``
+			let repObj = []
+			_.each(repAttr,function(r){
+				let name = r.get("name")
+				//the "name" should be the bit after the id
+				name = name.slice(name.indexOf(rowID)+rowID.length+1)
+				let cur = r.get("current")
+				let max = r.get("max")
+				let vals;
+				if(cur && cur.length > 0){
+					if(max && max.length > 0){
+						vals = [cur,max]
+					}
+					vals = cur
+				}
+				else if(max && max.length > 0){
+					vals = max
+				}
+				if(name==="name"){
+					repNameField = name;
+				}
+				else{
+					repObj.push({
+						name : vals
+					})
+				}
+			})
+			rObjs.push({
+				"id":rowID,
+				"name":repNameField,
+				"repfields":repObj,
+			})
+		})
+		//all collected now
+		return rObjs;
+	}
+	/**given a charid and a repeating row prefix will give the row ids and all the attributes related to those */
+	function getRepeatingSectionAttrs(charid, prefix){
+		const repeatingAttrs = {},
+			regExp = new RegExp(`^${prefix}_(-[-A-Za-z0-9]+?|\\d+)_`);
+		let repOrder;
+		// Get attributes
+		findObjs({
+			_type: 'attribute',
+			_characterid: charid
+		}).forEach(o => {
+			const attrName = o.get('name');
+			if (attrName.search(regExp) === 0) repeatingAttrs[attrName] = o;
+			else if (attrName === `_reporder_${prefix}`) repOrder = o.get('current').split(',');
+		});
+		if (!repOrder) repOrder = [];
+		// Get list of repeating row ids by prefix from repeatingAttrs
+		const unorderedIds = [...new Set(Object.keys(repeatingAttrs)
+			.map(n => n.match(regExp))
+			.filter(x => !!x)
+			.map(a => a[1]))];
+		const repRowIds = [...new Set(repOrder.filter(x => unorderedIds.includes(x)).concat(unorderedIds))];
+		return [repRowIds, repeatingAttrs];
+	}
+	/**given a character id will get the prefixes of all uniq repeating sections */
+	function sections(id){
+		let attrList = findObjs({
+			type: "attribute",
+			characterid: id,
+		});
+		let nameList = _.filter(attrList, a => {
+			if(a.get('name').indexOf('repeating_') > -1){return true;}
+			else{return false;}
+		});
+		let arraySections = [];
+		_.each(nameList,function(a){
+			if(a.get("name").search(/(repeating_.+?)_/) > -1){
+				a = a.get("name").match(/(repeating_.+?)_/)
+				arraySections.push(a[1])
+			}
+		});
+		arraySections = _.uniq(arraySections)
+		return arraySections;
+	}
+	
 
 	//Language
 	function capFirstLetterOfString(str){
@@ -90,11 +205,11 @@ const eCore = (function() {
 				idtype = `character`
 			}
 			if(idtype === `character`){
-				if(!thing){return false};
-				return getObj('character',thing);
+				if(!thing){return false}
+				return getObj('character',thing)
 			}
 		}
-	};
+	}
 
 	//API CHAT HANDLER
 	function processBasic(msg,api){
@@ -104,12 +219,12 @@ const eCore = (function() {
 			return args;
 		}
 		return false;
-	};
+	}
 
 	function argsBasic(msg){
 		let args = msg.content.split(/\s+/);
 		return args;
-	};
+	}
 
 	function processAdv(msg,api){
 		if(msg.type === "api" && msg.content.toLowerCase().startsWith(`!${api}`)){
@@ -117,7 +232,7 @@ const eCore = (function() {
 			return args;
 		}
 		return false;
-	};
+	}
 
 	function argsAdv(msg){
 		let args = msg.content.split(/\s+--/).map(arg=>{
@@ -129,7 +244,7 @@ const eCore = (function() {
 		});
 		args.shift();
 		return args;
-	};
+	}
 
 	function argsAdvCompare(args,cmd){
 		if(_.indexOf(_.pluck(args,"cmd"),cmd) != -1){
@@ -140,7 +255,7 @@ const eCore = (function() {
 			}
 		}
 		return false;
-	};
+	}
 
 	//error handler
 	function logBasic(errorMsg){
@@ -150,7 +265,7 @@ const eCore = (function() {
 	//log stuff
     function logAdv(logtext,name,version){
         log(name+", "+version+": "+logtext);
-    };
+    }
 
 	//chat bullocks
     function chat(msgText,slashCom,whisperTo,options,spkAs){
@@ -196,7 +311,7 @@ const eCore = (function() {
         msgText ? msgContents = msgContents.concat(` ${msgText}`) : log("chat request but no msgText specified") ;
         options == "noarchive" ? options = {noarchive:true} : false ;
         sendChat(spkAs,msgContents,null,options);
-    };
+    }
 
 	function getRandom(min=0, max=100,intBool=true,incBool=true) {
 		min = Math.ceil(min);
@@ -214,7 +329,7 @@ const eCore = (function() {
 		//string = string.replace(/\[/g,"&#91;");
 		//string = string.replace(/\]/g,"&#93;");
 		return string;
-	};
+	}
 
 	function extractDice(msg){
 		if(msg.inlinerolls){
@@ -238,9 +353,9 @@ const eCore = (function() {
 				}
 			}
 			return diceList;
-		};
+		}
 		return false;
-	};
+	}
 
 	function numberToEnglish(n, custom_join_character) {
 		var string = n.toString(), units, tens, scales, start, end, chunks, chunksLen, chunk, ints, i, word, words;

@@ -510,7 +510,7 @@ const mycr = (function() {
 			let iAvg = Math.ceil((CR.index.indexOf(defCR)+CR.index.indexOf(offCR))/2)
 			let trueCR = CR.index[iAvg]
 			let results = HTMLbuilder.msgInline(`${npc.name} is calculated as CR${trueCR}.`+
-			`<ul><li>${npc.hpformula}</li>`+
+			`<ul><li>${npc.hptotal}hp (${npc.hpformula})</li>`+
 			`<li>Def. CR: ${defCR}</li>`+
 			`<li>Off. CR: ${offCR}</li>`+
 			`</ul>`+

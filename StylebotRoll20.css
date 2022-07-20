@@ -971,7 +971,7 @@ background-color: transparent;
   background-color: #f1f1f1;
 }
 
-.content .message .sheet-rolltemplate-spelloutput,.sheet-rolltemplate-traits,.sheet-rolltemplate-default, .sheet-rolltemplate-spell .sheet-container{
+.content .message .sheet-rolltemplate-spelloutput,.sheet-rolltemplate-traits,.sheet-rolltemplate-default, .sheet-rolltemplate-spell .sheet-container,.sheet-rolltemplate-dmgaction{
   animation: chatIn .7s ease-out;
 }
 
@@ -1092,7 +1092,7 @@ background-color: transparent;
   padding-bottom:0.2em;
 }
 
-.sheet-rolltemplate-traits .sheet-desc, .sheet-rolltemplate-npcaction .sheet-container .sheet-desc{
+.sheet-rolltemplate-traits .sheet-desc, .sheet-rolltemplate-npcaction .sheet-container .sheet-desc,.sheet-rolltemplate-dmgaction .sheet-desc{
   display:block;
   padding: 0px 2px 2px 2px;
 }
@@ -1161,7 +1161,7 @@ margin-left:auto;
 margin-right:auto;
 }
 
-div.sheet-rolltemplate-traits{
+div.sheet-rolltemplate-traits, div.sheet-rolltemplate-dmgaction{
 width:auto;
 }
 

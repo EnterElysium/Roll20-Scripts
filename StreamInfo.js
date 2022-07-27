@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const StreamInfo = (function() {	
 	/*
 	High
@@ -12,9 +13,10 @@ const StreamInfo = (function() {
 
 	const scriptIndex = {"name":"StreamInfo","version":"v0.01","apiHP":apiHP,"apiHPandTemp":apiHPandTemp,"apiIDs":apiIDs,};
 
-	const ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
-	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
-	// playersStored = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
+	const ids = ["-M7tTaiSvMFgbPpZj1r9","-N7SUbV7ZmeGXowUxt3u","-MZ4y5hOAiTvIxPaR3dl","-M7tTUatxOb1X7MlJsJ3"];
+	const playerIDs = ["-M7rzq7dnxtvqatHo_a4","-N7WA1Ui-Zqp2f-MDHxY","-MZ4y9Vys9_ZQofWB4o9","-M7rzsfu4FtWQIDkj01K"];
+	//stored ids = ["-M7tTaiSvMFgbPpZj1r9","-M7tTUatxOb1X7MlJsJ3","-MZ4y5hOAiTvIxPaR3dl"];
+	// stored playerIDs = ["-M7rzq7dnxtvqatHo_a4","-M7rzsfu4FtWQIDkj01K","-MZ4y9Vys9_ZQofWB4o9"];
 	// const testplayer = ["-MTq8lHfzjgUC_8GLekj"];
 	// const gmID = ["-M7raV5XUzZQgU9bPw7A"];
 	const ignoreMusic = [`CriticalHit`];
@@ -120,7 +122,7 @@ const StreamInfo = (function() {
 		set initHistoryNow(now){
 			this._initHistory[0] = now;
 		}
-		set initHistoryNow(old){
+		set initHistoryOld(old){
 			this._initHistory[1] = old;
 		}
 		checkChanged(arg){
@@ -315,7 +317,11 @@ const StreamInfo = (function() {
 						_type:"attribute",
 						name:`deathsave_succ${i}`
 					})[0]
-					if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_succ${i}`){
+					if(dss === undefined || dss === null){
+						this._dsNewSucc += 0;
+						this._dsOldSucc += 0;
+					}
+					else if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_succ${i}`){
 						dss = [charNew.get(`current`),charOld[`current`]];
 						this._dsNewSucc += dss[0] === "on" ? 1 : 0;
 						this._dsOldSucc += dss[1] === "on" ? 1 : 0;
@@ -332,7 +338,11 @@ const StreamInfo = (function() {
 						_type:"attribute",
 						name:`deathsave_fail${i}`
 					})[0]
-					if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_fail${i}`){
+					if(dsf === undefined || dsf === null){
+						this._dsNewFail += 0;
+						this._dsOldFail += 0;
+					}
+					else if(charNew && typeof charNew.get === "function" && id == charNew.get("characterid") && charNew.get("name") === `deathsave_fail${i}`){
 						dsf = [charNew.get(`current`),charOld[`current`]];
 						this._dsNewFail += dsf[0] === "on" ? 1 : 0;
 						this._dsOldFail += dsf[1] === "on" ? 1 : 0;
@@ -347,7 +357,7 @@ const StreamInfo = (function() {
 				//dice construction
 				this._changedDice = false;
 				this._dice = [];
-				if (msg && (Char.extractChar(msg) == this.id || msg.playerid == this.pid )){ //this currently only gets rolls with the character name in them, need to sort non-sheet rolls
+				if (msg && (Char.extractChar(msg) == this.id || msg.playerid == this.pid )){
 					let d = Char.extractDice(msg);
 					if(d && Array.isArray(d) && d.length > 0){
 						this._dice = d;
@@ -471,7 +481,7 @@ const StreamInfo = (function() {
 			let lenObfuscated = Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 			for(let d = 1;d<=lenObfuscated;d++){
 				diceObfuscated.push("?");
-			};
+			}
 			this._dice = diceObfuscated;
 		}
 		static capBounds(num,max){
@@ -506,9 +516,9 @@ const StreamInfo = (function() {
 					}
 				}
 				return diceList;
-			};
+			}
 			return false;
-		};
+		}
 		//get character id from msg
 		static extractChar(msg,returnType){
 			if(!msg || !msg.content){
@@ -533,10 +543,10 @@ const StreamInfo = (function() {
 					case "name": return character.get("name");
 					case "id": return character.id;
 					default: return character.id;
-				};
-			};
+				}
+			}
 			return false;
-		};
+		}
 		static koState(hpNew=1,hpOld=1){
 			if(hpNew <= 0 && hpOld > 0){
 				return "godown";
@@ -549,9 +559,9 @@ const StreamInfo = (function() {
 			}
 			else{
 				return "conscious";
-			};
+			}
 		}
-	};
+	}
 
     on('chat:message', function(msg) {
 		if(msg && (msg.inlinerolls || msg.type === "rollresult")){
@@ -632,7 +642,7 @@ const StreamInfo = (function() {
 				}
 			}
 		}
-	};
+	}
 
 	function chatUpdate(which,action){
 		if(which === `turnorder`){
@@ -669,7 +679,7 @@ const StreamInfo = (function() {
 
 		//change the death overlays and music track
 		if(changed.what === "ds" || changed.what === "music"){
-			handoutContent = ``;
+			let handoutContent = ``;
 			handoutContent += deathFilter(changed);
 			let handoutSuffix = `Dead`;
 			rewriteHandout(handoutContent,handoutSuffix);
@@ -683,12 +693,11 @@ const StreamInfo = (function() {
 			[handoutContent,handoutSuffix,handout] = rewriteHandout(handoutContent,handoutSuffix,true);
 			initCheck(changed.initHistory,handoutContent,handout);
 		}
-	};
+	}
 
 	function deathFilter(changed){
 		//set characters that are dead to dead
-		handoutContent = ``;
-		let i = 0;
+		let handoutContent = ``;
 		for (let char of changed.chars){
 			//death filter
 			let trigger = false;
@@ -743,7 +752,7 @@ const StreamInfo = (function() {
 			let musicTitle = changed.music
 			if(musicTitle.match(/^ES_/)){
 				musicTitle = musicTitle.replace(/^ES_|\s-\s.+$/g,"");
-			};
+			}
 			musicTitle = musicTitle.replace(/^[0-9]+|_/g," ").trim();
 			musicTitle = musicTitle.replace(/\sby\s.+$/,"");
 			handoutContent += `<div class="dicebox"><div class="jukeboxlayer" style="position: absolute; width: 100%; height: 100%;"><div class="nowplaying" style="opacity: 0;"><span class="musictitle">${musicTitle}</span></div></div></div>`
@@ -764,7 +773,7 @@ const StreamInfo = (function() {
 		else{
 			handout.set('notes',handoutContent);
 		}
-	};
+	}
 
 	function initCheck(inits,handoutContNew,handout){
 		handout.get('notes', function(handoutContOld){
@@ -784,7 +793,7 @@ const StreamInfo = (function() {
 			}
 		});
 		handout.set('notes',handoutContNew);
-	};
+	}
 
 	function turnorderOn(c){
 		if(!c.get || typeof c.get !== "function" || c.get("turnorder") == false){
@@ -806,7 +815,7 @@ const StreamInfo = (function() {
 				},0);
 			}
 		});
-	};
+	}
 
 	function turnorderOff(){
 		let handout = getHandout(`Init`);
@@ -824,7 +833,7 @@ const StreamInfo = (function() {
 				},0);
 			}
 		});
-	};
+	}
 
 	function handoutWrap(side){
 		if(side === `start`){
@@ -978,12 +987,11 @@ const StreamInfo = (function() {
 		else{
 			return ``;
 		}
-	};
+	}
 
 	function diceConstructor(char){
 		//DS AREA
 		if(char.changedDice && char.dice && Array.isArray(char.dice) && char.dice.length > 0){
-			let diceList = char.dice;
 			let dice = ``;
 			let index = 0;
 			let fontsize = 60/Math.pow((char.dice.length+2),1)+20;
@@ -991,7 +999,7 @@ const StreamInfo = (function() {
 			if(char.dice.length <= 2){dicepool = `small`}
 			else if(char.dice.length <= 5){dicepool = `med`}
 			else if(char.dice.length <= 8){dicepool = `large`}
-			else{dicepool = `vlarge`};
+			else{dicepool = `vlarge`}
 			for (let d of char.dice){
 				if(d){
 					index++;
@@ -1010,18 +1018,18 @@ const StreamInfo = (function() {
 		else{
 			return ``;
 		}
-	};
+	}
 
 	function toPerCSS(num,upperBound){
 		num = Math.abs(num);
 		if(upperBound){
 			num = Math.min(num,upperBound);
-		};
+		}
 		num = Math.round(num);
 		num = num.toString();
 		num += `%`
 		return num;
-	};
+	}
 
 	function getHandout(suffix) {
 		let handout = filterObjs(function(o){
@@ -1031,13 +1039,13 @@ const StreamInfo = (function() {
 			return handout;
 		} 
         return createHandout(suffix);
-    };
+    }
 
 	function createHandout(suffix) {
         let handout = createObj('handout',{name: `${scriptIndex.name}${suffix}`});
 		handout.set('notes', '');
         return handout;
-	};
+	}
 
 	//error handler
 	function errorHandler(errorMsg,who,useChat,useLog){
@@ -1046,12 +1054,12 @@ const StreamInfo = (function() {
 		useLog === true ? logger(errorMsg) : false;
 		useChat === true ? chatter(errorMsg,"w",who,"noarchive") : false;
 		return;
-	};
+	}
 
 	//log stuff
     function logger(logtext){
         log(scriptIndex.name+", "+scriptIndex.version+": "+logtext);
-    };
+    }
 
 	//chat bullocks
     function chatter(msgText,slashCom,whisperTo,options,spkAs){
@@ -1097,18 +1105,18 @@ const StreamInfo = (function() {
         msgText ? msgContents = msgContents.concat(` ${msgText}`) : logger("chat request but no msgText specified") ;
         options == "noarchive" ? options = {noarchive:true} : false ;
         sendChat(spkAs,msgContents,null,options);
-    };
+    }
 
 	function apiHP(obj,prev){
 		parseChanges(createChange(obj,prev));
-	};
+	}
 	function apiHPandTemp(obj,prev,obj2,prev2){
 		parseChanges(createChange([obj,obj2],[prev,prev2]));
-	};
+	}
 
 	function apiIDs(){
 		return ids;
-	};
+	}
 
 	return scriptIndex;
 })();

@@ -15,7 +15,7 @@
     --barheight: 38px;
     /*bar position*/
     --barPosTopMain: 398px;
-    --barPosTopBottom: 898px;
+    --barPosTopBottom: 700px;
     --barPosLeftGM: 62px;
     --barPosLeftPC1: 512px;
     --barPosLeftPC2: 962px;
@@ -29,7 +29,7 @@
     --initBoxHeight: 249px;
     /*border position*/
     --initPosTopMain: 145px;
-    --initPosTopBottom: 545px;
+    --initPosTopBottom: 449px;
     --initPosLeftGM: 56px;
     --initPosLeftPC1: 507px;
     --initPosLeftPC2: 956px;
@@ -54,7 +54,13 @@
     --diceBoxWidth:var(--initBoxWidth);
     --diceBoxHeight:545px;
 }
-
+.userscript-infoHandout.userscript-cast5{
+    /*DICE BOX*/
+    --diceBoxTop:748px;
+    --diceBoxLeft:1406px;
+    --diceBoxWidth:var(--initBoxWidth);
+    --diceBoxHeight:245px;
+}
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 * {

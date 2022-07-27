@@ -7,7 +7,7 @@
     font-family: 'Slabo 27px', serif !important;
     --fontDefault: 'Slabo 27px', serif !important;
 }
-/*CAST of 4 & 5 PLAYERS*/
+/*CAST of 4 PLAYERS*/
 .userscript-infoHandout.userscript-cast4{
     /*BARS*/
     /*bar size*/
@@ -54,6 +54,53 @@
     --diceBoxWidth:522px;
     --diceBoxHeight:811px;
 }
+/*CAST of 5 PLAYERS*/
+.userscript-infoHandout.userscript-cast5{
+    /*BARS*/
+    /*bar size*/
+    --barwidth: 571px;
+    --barheight: 57px;
+    /*bar position*/
+    --barPosTopMain: 504px;
+    --barPosTopBottom: 932px;
+    --barPosLeftGM: 675px;
+    --barPosLeftPC1: 90px;
+    --barPosLeftPC2: 1262px;
+    --barPosLeftPC3: 90px;
+    --barPosLeftPC4: 1262px;
+    /*INIT BORDERS*/
+    /*image*/
+    --initBorderImg4: url(https://s3.amazonaws.com/files.d20.io/images/296700889/cqM-YcfFJhakO0-cemedpQ/max.png);
+    /*border size*/
+    --initBoxWidth: 583px;
+    --initBoxHeight: 347px;
+    /*border position*/
+    --initPosTopMain: 150px;
+    --initPosTopBottom: 577px;
+    --initPosLeftGM: 670px;
+    --initPosLeftPC1: 83px;
+    --initPosLeftPC2: 1256px;
+    --initPosLeftPC3: 82px;
+    --initPosLeftPC4: 1256px;
+    /*deathsaves*/
+    /*dice floats*/
+    --slow: 1.0;
+    --med: 0.7;
+    --fast: 0.5;
+    --veryfast: 0.4;
+    /*deathfilter*/
+    --bgDead: rgba(255, 237, 237,0.15);
+    --shadowDead: inset  0px 0px 150px 50px rgba(8, 0, 0, 1);
+    --bgKO: rgba(144, 0, 0,0.15);
+    --shadowKO: inset  0px 0px 150px 10px rgba(112, 0, 0, 1);
+}
+.userscript-infoHandout.userscript-cast5{
+    /*DICE BOX*/
+    --diceBoxTop:577px;
+    --diceBoxLeft:699px;
+    --diceBoxWidth:523px;
+    --diceBoxHeight:422px;
+}
 
 body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
@@ -85,35 +132,56 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 .userscript-infoHandout .userscript-hpBarMax.userscript-delayHP{
     --delayHP: 3s;
 }
-.userscript-infoHandout .userscript-hpBarMax.userscript-player0, .userscript-infoHandout .userscript-hpBarMax.userscript-player0{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player0{
     position: fixed;
-    top: var(--barPosTopMain);
     left: var(--barPosLeftGM);
 }
-
-.userscript-infoHandout .userscript-hpBarMax.userscript-player1, .userscript-infoHandout .userscript-hpBarMax.userscript-player1{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player1{
     position: fixed;
-    top: var(--barPosTopMain);
     left: var(--barPosLeftPC1);
 }
-
-.userscript-infoHandout .userscript-hpBarMax.userscript-player2, .userscript-infoHandout .userscript-hpBarMax.userscript-player2{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player2{
     position: fixed;
-    top: var(--barPosTopBottom);
     left: var(--barPosLeftPC2);
 }
-
-.userscript-infoHandout .userscript-hpBarMax.userscript-player3, .userscript-infoHandout .userscript-hpBarMax.userscript-player3{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player3{
     position: fixed;
-    top: var(--barPosTopBottom);
     left: var(--barPosLeftPC3);
 }
-
-.userscript-infoHandout .userscript-hpBarMax.userscript-player4, .userscript-infoHandout .userscript-hpBarMax.userscript-player4{
+.userscript-infoHandout .userscript-hpBarMax.userscript-player4{
     position: fixed;
-    top: var(--barPosTopBottom);
     left: var(--barPosLeftPC4);
 }
+
+.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player0{
+    top: var(--barPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player1{
+    top: var(--barPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player2{
+    top: var(--barPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-hpBarMax.userscript-player3{
+    top: var(--barPosTopBottom);
+}
+
+.userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player0{
+    top: var(--barPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player1{
+    top: var(--barPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player2{
+    top: var(--barPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player3{
+    top: var(--barPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-hpBarMax.userscript-player4{
+    top: var(--barPosTopBottom);
+}
+
 .userscript-hpBarFlex{
     background: linear-gradient(90deg, rgba(38,14,2,0.1) 0%, rgba(40,17,2,0) 20%, rgba(201,173,14,0) 80%, rgba(201,173,14,0.1) 100%), linear-gradient(0deg, rgba(100,0,0,1) 0%, rgba(225,0,0,1) 100%) !important;
     opacity:0.42;
@@ -239,29 +307,57 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
     top: var(--initPosTopMain);
     left: var(--initPosLeftGM);
 }
-
 .userscript-infoHandout .userscript-initBorder.userscript-player1{
     position: fixed;
     top: var(--initPosTopMain);
     left: var(--initPosLeftPC1);
 }
-
 .userscript-infoHandout .userscript-initBorder.userscript-player2{
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC2);
 }
-
 .userscript-infoHandout .userscript-initBorder.userscript-player3{
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC3);
 }
-
 .userscript-infoHandout .userscript-initBorder.userscript-player4{
     position: fixed;
     top: var(--initPosTopBottom);
     left: var(--initPosLeftPC4);
+}
+
+.userscript-infoHandout.userscript-cast4 .userscript-initBorder.userscript-player0{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-initBorder.userscript-player1{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-initBorder.userscript-player2{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-initBorder.userscript-player3{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-initBorder.userscript-player4{
+    top: var(--initPosTopBottom);
+}
+
+.userscript-infoHandout.userscript-cast5 .userscript-initBorder.userscript-player0{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-initBorder.userscript-player1{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-initBorder.userscript-player2{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-initBorder.userscript-player3{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-initBorder.userscript-player4{
+    top: var(--initPosTopBottom);
 }
 
 /*deathsaves*/
@@ -610,32 +706,55 @@ body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden;}
 
 .userscript-infoHandout .userscript-deathContainer.userscript-player0{
     position: fixed;
-    top: var(--initPosTopMain);
     left: var(--initPosLeftPC1);
 }
-
 .userscript-infoHandout .userscript-deathContainer.userscript-player1{
     position: fixed;
-    top: var(--initPosTopMain);
     left: var(--initPosLeftPC1);
 }
-
 .userscript-infoHandout .userscript-deathContainer.userscript-player2{
     position: fixed;
-    top: var(--initPosTopMain);
     left: var(--initPosLeftPC2);
 }
-
 .userscript-infoHandout .userscript-deathContainer.userscript-player3{
     position: fixed;
-    top: var(--initPosTopMain);
     left: var(--initPosLeftPC3);
 }
-
 .userscript-infoHandout .userscript-deathContainer.userscript-player4{
     position: fixed;
-    top: var(--initPosTopBottom);
     left: var(--initPosLeftPC4);
+}
+
+.userscript-infoHandout.userscript-cast4 .userscript-deathContainer.userscript-player0{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-deathContainer.userscript-player1{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-deathContainer.userscript-player2{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-deathContainer.userscript-player3{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast4 .userscript-deathContainer.userscript-player4{
+    top: var(--initPosTopBottom);
+}
+
+.userscript-infoHandout.userscript-cast5 .userscript-deathContainer.userscript-player0{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-deathContainer.userscript-player1{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-deathContainer.userscript-player2{
+    top: var(--initPosTopMain);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-deathContainer.userscript-player3{
+    top: var(--initPosTopBottom);
+}
+.userscript-infoHandout.userscript-cast5 .userscript-deathContainer.userscript-player4{
+    top: var(--initPosTopBottom);
 }
 
 /*Dice Box*/
